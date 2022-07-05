@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --ignore-path .eslintignore --dir src",
@@ -15,15 +15,19 @@
     "fix": "run-p lint:fix format:fix type-check"
   },
   "dependencies": {
+    "classnames": "^2.3.1",
     "next": "12.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-icons": "^4.4.0"
+    "react-draggable": "^4.4.5",
+    "react-icons": "^4.4.0",
+    "throttle-debounce": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",
+    "@types/throttle-debounce": "^5.0.0",
     "autoprefixer": "^10.4.7",
     "eslint": "^8.18.0",
     "eslint-config-next": "12.1.6",
