@@ -18,6 +18,7 @@ const INIT_NODES = [
     {
       label: "Node 01",
       color: "#fda4aeed",
+      nodeType: "hoge"
     },
     {
       pos: {
@@ -38,6 +39,7 @@ const INIT_NODES = [
     {
       label: "Node 02",
       color: "#14b8a5ed",
+      nodeType: "hoge"
     },
     {
       pos: {
@@ -55,6 +57,8 @@ const INIT_NODES = [
     {
       label: "Node 03",
       color: "#fb923ced",
+      nodeType: "hoge"
+
     },
     {
       pos: {
@@ -72,6 +76,8 @@ const INIT_NODES = [
     {
       label: "Node 04",
       color: "#fb923ced",
+      nodeType: "hoge"
+
     },
     {
       pos: {
@@ -108,6 +114,8 @@ const ComponentsSideList = () => {
           {
             label: node.node.label,
             color: node.node.color,
+            nodeType: node.node.nodeType,
+
           },
           {
             pos: node.pos,
