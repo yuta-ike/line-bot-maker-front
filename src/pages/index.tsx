@@ -3,31 +3,53 @@ import { BsFillFileCodeFill } from 'react-icons/bs';
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import Header from '../modules/Header'
 
 const FileComponent: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <a href="https://ja.wikipedia.org/wiki/%E6%AF%9B%E5%88%A9%E5%B0%8F%E4%BA%94%E9%83%8E"><BsFillFileCodeFill size={128}/></a>
       <div className="pb-1"/>
-      <a href="https://ja.wikipedia.org/wiki/%E6%9C%8D%E9%83%A8%E5%B9%B3%E6%AC%A1" className="text-xl font-serif bg-amber-200 rounded-lg">せやかて工藤</a>
+      <a href="https://ja.wikipedia.org/wiki/%E6%9C%8D%E9%83%A8%E5%B9%B3%E6%AC%A1" className="text-xl bg-amber-200 rounded-lg">せやかて工藤</a>
       <div className="pb-2"/>
     </div>
   )
 }
 
+type TodoItem = {
+  id: number;
+  content: string;
+};
+
 const Home: NextPage = () => {
   return (
-    <div className="p-4 bg-fixed">
-      <h1 className="text-4xl text-center text-green-700 font-semibold">ここは名古屋の別天地・竜泉寺の湯</h1>
-      <div className="text-2xl text-center text-red-700 font-extrabold">恋人はサンタクロース</div>
-      <div className="grid grid-cols-1 lg:grid-cols-3">
+    <div className="mt-20 p-4 bg-fixed font-mplus">
+      <Header/>
+      <form action="http://localhost:3000" method="get">
+      	<div className="flex flex-col items-center">
+	       	<div className="flex flex-row">
+            <input className="container border border-gray-300 w-64 h-8 bg-gray-100 font-mplus" type="text" name="search" placeholder="キーワードを入力"/>
+            <div className="w-4"/>
+            <input className="container border border-black w-12" type="submit" name="submit" value="検索" />
+          </div>
+	      </div>
+      </form>
+      <div className="mt-4 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-5">
+        <div/>
         <FileComponent/>
         <FileComponent/>
         <FileComponent/>
+        <div/>
+        <div/>
         <FileComponent/>
         <FileComponent/>
         <FileComponent/>
+        <div/>
+        <div/>
         <FileComponent/>
+        <div/>
+      </div>
       </div>
     </div>
   )
