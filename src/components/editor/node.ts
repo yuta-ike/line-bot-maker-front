@@ -67,6 +67,8 @@ export class GraphNodeClass {
     label: string //これがノード内に表示される
     limit: number | null
   }[]
+  //これはユーザがノードに記入する値（例えば，TextInputNodeであるならば，質問文）
+  public createrInputValue = ""
 
   constructor(
     node: EditorNode,

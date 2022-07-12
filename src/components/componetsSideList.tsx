@@ -6,40 +6,115 @@ import { Coordinate, Edge, GraphNodeClass } from "./editor/node"
 import useCursorPos from "./utils/getCursorPos"
 import Line from "./Line"
 import LineUI from "./presentation/LineUI"
+import TextInputNode from "./nodetypes/TextInputNode"
+import TextOutputNode from "./nodetypes/TextOutputNode"
+import CorrespondCheckNode from "./nodetypes/CorrespondCheckNode"
+import IncludeCheckNode from "./nodetypes/IncludeCheckNode"
+import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
 
 //nodeのサイズ
-const NODE_WIDTH = 160
-const NODE_HEIGHT = 80
+//使われていない
+// const NODE_WIDTH = 160
+// const NODE_HEIGHT = 80
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
 const INIT_NODES = [
+  // new GraphNodeClass(
+  //   {
+  //     label: "Node 01",
+  //     color: "#fda4aeed",
+  //     nodeType: "",
+  //   },
+  //   {
+  //     pos: {
+  //       x: 50,
+  //       y: 50,
+  //     },
+  //     inPoints: [
+  //       { type: "number", label: "input", limit: null },
+  //       { type: "number", label: "input", limit: null },
+  //     ],
+  //     outPoints: [
+  //       { type: "number", label: "yes", limit: null },
+  //       { type: "number", label: "no", limit: null },
+  //     ],
+  //   },
+  // ),
+  // new GraphNodeClass(
+  //   {
+  //     label: "Node 02",
+  //     color: "#14b8a5ed",
+  //     nodeType: "",
+  //   },
+  //   {
+  //     pos: {
+  //       x: 50,
+  //       y: 150,
+  //     },
+  //     inPoints: [{ type: "number", label: "input", limit: null }],
+  //     outPoints: [
+  //       { type: "number", label: "yes", limit: null },
+  //       { type: "number", label: "no", limit: null },
+  //     ],
+  //   },
+  // ),
+  // new GraphNodeClass(
+  //   {
+  //     label: "Node 03",
+  //     color: "#fb923ced",
+  //     nodeType: "",
+  //   },
+  //   {
+  //     pos: {
+  //       x: 50,
+  //       y: 250,
+  //     },
+  //     inPoints: [
+  //       { type: "number", label: "input", limit: null },
+  //       { type: "number", label: "input", limit: null },
+  //     ],
+  //     outPoints: [{ type: "number", label: "no", limit: null }],
+  //   },
+  // ),
+  // new GraphNodeClass(
+  //   {
+  //     label: "Node 04",
+  //     color: "#fb923ced",
+  //     nodeType: "",
+  //   },
+  //   {
+  //     pos: {
+  //       x: 50,
+  //       y: 350,
+  //     },
+  //     inPoints: [
+  //       { type: "number", label: "input", limit: null },
+  //       { type: "number", label: "input", limit: null },
+  //     ],
+  //     outPoints: [{ type: "number", label: "no", limit: null }],
+  //   },
+  // ),
   new GraphNodeClass(
     {
-      label: "Node 01",
-      color: "#fda4aeed",
-      nodeType: "hoge"
+      label: "テキスト入力",
+      color: "#06c755",
+      nodeType: "textInputNode",
     },
     {
       pos: {
         x: 50,
         y: 50,
       },
-      inPoints: [
-        { type: "number", label: "input", limit: null },
-        { type: "number", label: "input", limit: null },
-      ],
-      outPoints: [
-        { type: "number", label: "yes", limit: null },
-        { type: "number", label: "no", limit: null },
-      ],
+      inPoints: [{ type: "number", label: "input", limit: null }],
+      outPoints: [{ type: "number", label: "confirmed", limit: null }],
     },
   ),
   new GraphNodeClass(
     {
-      label: "Node 02",
-      color: "#14b8a5ed",
-      nodeType: "hoge"
+      label: "テキスト含有",
+      color: "#a9a9a9",
+      nodeType: "includeCheckNode",
     },
     {
       pos: {
@@ -55,40 +130,57 @@ const INIT_NODES = [
   ),
   new GraphNodeClass(
     {
-      label: "Node 03",
-      color: "#fb923ced",
-      nodeType: "hoge"
-
+      label: "テキスト一致",
+      color: "#a9a9a9",
+      nodeType: "correspondCheckNode",
     },
     {
       pos: {
         x: 50,
         y: 250,
       },
-      inPoints: [
-        { type: "number", label: "input", limit: null },
-        { type: "number", label: "input", limit: null },
+      inPoints: [{ type: "number", label: "input", limit: null }],
+      outPoints: [
+        { type: "number", label: "yes", limit: null },
+        { type: "number", label: "no", limit: null },
       ],
-      outPoints: [{ type: "number", label: "no", limit: null }],
     },
   ),
   new GraphNodeClass(
     {
-      label: "Node 04",
-      color: "#fb923ced",
-      nodeType: "hoge"
-
+      label: "テキスト出力",
+      color: "#06c755",
+      nodeType: "textOutputNode",
     },
     {
       pos: {
         x: 50,
         y: 350,
       },
-      inPoints: [
-        { type: "number", label: "input", limit: null },
-        { type: "number", label: "input", limit: null },
+      inPoints: [{ type: "number", label: "input", limit: null }],
+      outPoints: [
+        { type: "number", label: "yes", limit: null },
+        { type: "number", label: "no", limit: null },
       ],
-      outPoints: [{ type: "number", label: "no", limit: null }],
+    },
+  ),
+  new GraphNodeClass(
+    {
+      label: "天気予報",
+      color: "#4169e1",
+      nodeType: "weatherCheckNode",
+    },
+    {
+      pos: {
+        x: 50,
+        y: 450,
+      },
+      inPoints: [{ type: "number", label: "input", limit: null }],
+      outPoints: [
+        { type: "number", label: "sunny", limit: null },
+        { type: "number", label: "cloudy", limit: null },
+        { type: "number", label: "rainy", limit: null },
+      ],
     },
   ),
 ]
@@ -115,7 +207,6 @@ const ComponentsSideList = () => {
             label: node.node.label,
             color: node.node.color,
             nodeType: node.node.nodeType,
-
           },
           {
             pos: node.pos,
@@ -124,6 +215,22 @@ const ComponentsSideList = () => {
           },
         ),
       )
+    }
+  }
+
+  const checkNodeType = (node: GraphNodeClass) => {
+    if (node.node.nodeType == "textInputNode") {
+      return <TextInputNode />
+    } else if (node.node.nodeType == "includeCheckNode") {
+      return <IncludeCheckNode node={node} />
+    } else if (node.node.nodeType == "correspondCheckNode") {
+      return <CorrespondCheckNode node={node} />
+    } else if (node.node.nodeType == "textOutputNode") {
+      return <TextOutputNode node={node} />
+    } else if (node.node.nodeType == "weatherCheckNode") {
+      return <WeatherCheckNode />
+    } else {
+      return node.node.label
     }
   }
 
@@ -152,7 +259,7 @@ const ComponentsSideList = () => {
       className="draggable-parent static min-h-screen border border-blue-100"
       onClick={() => setTempEdgeStartNodeId(null)}
     >
-      {/* // <div > */}
+      {/* 線? */}
       {tmpEdgeStartNodeId != null &&
         (() => {
           const tmpStartNode = getNode(tmpEdgeStartNodeId.nodeId)
@@ -171,8 +278,9 @@ const ComponentsSideList = () => {
                 startPos={startPointPos}
                 //このデルタはなに？
                 delta={{
-                  x: cursorPos.x - 32 - startPointPos.x,
-                  y: cursorPos.y - 32 - startPointPos.y,
+                  //-32を消した
+                  x: cursorPos.x - startPointPos.x,
+                  y: cursorPos.y - startPointPos.y,
                 }}
               />
             </div>
@@ -183,9 +291,10 @@ const ComponentsSideList = () => {
           key={`${edge.start.nodeId}_${edge.start.pointId}_${edge.end.nodeId}_${edge.end.pointId}`}
           edge={edge}
           getNode={getNode}
-          onDelete={() =>
+          onDelete={() => {
+            console.log("onDelete")
             setEdges((edges) => edges.filter((e) => !isSameEdge(e, edge)))
-          }
+          }}
         />
       ))}
 
@@ -210,12 +319,22 @@ const ComponentsSideList = () => {
           }
           onStart={() => regenerateNode(node)}
         >
+          {/* <> */}
+          {/* nodeの大枠を決める */}
           <div
             className="relative flex h-20 w-40 items-center justify-center rounded text-white shadow"
             style={{ background: node.node.color }}
           >
-            {node.node.label}
+            {/* nodeの名前 */}
+            {/* {node.node.label} */}
+            {checkNodeType(node)}
+            {/* ここに機能を追加する */}
+            {/* inPointsの描画 */}
+            {/* <> */}
+            {/* {checkNodeType(node.node.nodeType)} */}
+            {/* 位置 */}
             <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
+              {/* 機能 */}
               {node.inPoints.map((point, i) => (
                 <button
                   key={i}
@@ -247,6 +366,7 @@ const ComponentsSideList = () => {
                     }
                   }}
                 >
+                  {/* inputを選択しているときに，つなげられる可能性のある点の色分け */}
                   <div
                     className={classNames(
                       "h-5 w-5 rounded-full border-2 border-white transition",
@@ -263,12 +383,14 @@ const ComponentsSideList = () => {
                         : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
                     )}
                   />
+                  {/* inputの文字 */}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
                     {point.label}
                   </div>
                 </button>
               ))}
             </div>
+            {/* outPointsの描画 */}
             <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 justify-evenly">
               {node.outPoints.map((point, i) => (
                 <button
@@ -281,6 +403,7 @@ const ComponentsSideList = () => {
                     }
                   }}
                 >
+                  {/* inPointsを選択中に，outPointsの色を変更する */}
                   <div
                     className={classNames(
                       "h-5 w-5 rounded-full border-2 border-white transition",
@@ -289,13 +412,17 @@ const ComponentsSideList = () => {
                         : "scale-50 cursor-not-allowed bg-gray-300",
                     )}
                   />
+                  {/* outputの文字 */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
                     {point.label}
                   </div>
                 </button>
               ))}
             </div>
+            {/* </> */}
           </div>
+          {/* {checkNodeType(node.node.nodeType)} */}
+          {/* </> */}
         </Draggable>
       ))}
     </div>
