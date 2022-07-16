@@ -15,8 +15,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14.x
-          cache: yarn
+          cache: npm
       - name: install npm packages
-        run: yarn --check-files --non-interactive
+        run: npm ci
       - name: Run lint and formatter
-        run: yarn run ci
+        run: npm run check

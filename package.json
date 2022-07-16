@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 8080",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --ignore-path .eslintignore --dir src",
@@ -11,7 +11,7 @@
     "format": "prettier --ignore-path .prettierignore --check .",
     "format:fix": "yarn format --write",
     "type-check": "yarn tsc --noEmit",
-    "ci": "run-p lint format type-check",
+    "check": "run-p lint format type-check",
     "fix": "run-p lint:fix format:fix type-check"
   },
   "dependencies": {
