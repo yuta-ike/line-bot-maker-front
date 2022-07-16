@@ -3,7 +3,7 @@ import Document, {
   Head,
   Main,
   NextScript,
-  type DocumentContext,
+  DocumentContext,
 } from "next/document"
 
 class MyDocument extends Document {
