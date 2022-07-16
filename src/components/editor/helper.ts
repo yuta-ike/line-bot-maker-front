@@ -17,3 +17,6 @@ export const isSameEdge = (e1: Edge, e2: Edge) => {
     e1.end.pointId === e2.end.pointId
   )
 }
+
+export const calcEdgeId = (edge: Edge) =>
+  `${edge.start.nodeId}_${edge.start.pointId}_${edge.end.nodeId}_${edge.end.pointId}`

@@ -1,62 +1,87 @@
 import classNames from "classnames"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect } from "react"
+import { FiTrash2 } from "react-icons/fi"
 
 export type LineUIProps = {
   startPos: { x: number; y: number }
   delta: { x: number; y: number }
+  isFocused?: boolean
+  onFocus?: () => void
   onDelete?: () => void
 }
 
-const LineUI: React.FC<LineUIProps> = ({ startPos, delta, onDelete }) => {
-  const [isFocused, setIsFocused] = useState(false)
-  // const [isFocused2, setIsFocused2] = useState(false)
-
+const LineUI: React.FC<LineUIProps> = ({
+  startPos,
+  delta,
+  isFocused = false,
+  onFocus,
+  onDelete,
+}) => {
   useEffect(() => {
-    const listener = () => setIsFocused(false)
-    window.addEventListener("click", listener)
-    return () => window.removeEventListener("click", listener)
-  }, []) //初回のみ実行
-
-  useEffect(() => {
-    const listener = () => {
-      // if (e.key === "Backspace" && e.ctrlKey === true && isFocused) {
-      console.log("onDelete@LineUI")
-      onDelete?.()
-      // }
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === "Backspace" && e.ctrlKey === true && isFocused) {
+        console.log("onDelete@LineUI")
+        onDelete?.()
+      }
     }
     window.addEventListener("keydown", listener)
-    return () => {
-      window.removeEventListener("keydown", listener)
-    }
-  }, []) //初回のみ実行
+    return () => window.removeEventListener("keydown", listener)
+  }, [isFocused, onDelete]) //初回のみ実行
+
+  const path = `M ${startPos.x},${startPos.y} Q ${startPos.x} ${
+    startPos.y + delta.y / 4
+  } ${startPos.x + delta.x / 2},${startPos.y + delta.y / 2} T ${
+    startPos.x + delta.x
+  } ${startPos.y + delta.y}`
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="pointer-events-none overflow-visible"
-    >
-      <path
-        d={`M ${startPos.x},${startPos.y} Q ${startPos.x} ${
-          startPos.y + delta.y / 4
-        } ${startPos.x + delta.x / 2},${startPos.y + delta.y / 2} T ${
-          startPos.x + delta.x
-        } ${startPos.y + delta.y}`}
-        fill="none"
-        stroke="black"
+    <>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="pointer-events-none overflow-visible"
+      >
+        {/* NOTE: クリック領域を拡大するために、透明な太い線を設定 */}
+        <path
+          d={path}
+          fill="none"
+          stroke="transparent"
+          strokeWidth={20}
+          className="pointer-events-auto cursor-pointer"
+          onClick={onFocus}
+        />
+        <path
+          d={path}
+          fill="none"
+          stroke="black"
+          className={classNames(
+            "pointer-events-none transition-[stroke,stroke-width]",
+            isFocused
+              ? "stroke-red-400 stroke-[6px] drop-shadow-2xl"
+              : "stroke-gray-500 stroke-[4px]",
+          )}
+        />
+      </svg>
+      <div
         className={classNames(
-          "pointer-events-auto cursor-pointer transition",
-          isFocused
-            ? "stroke-red-600 stroke-[6px]"
-            : "stroke-gray-500 stroke-[4px]",
+          "absolute -translate-x-1/2 -translate-y-1/2",
+          !isFocused && "invisible",
         )}
-        onClick={(e) => {
-          e.stopPropagation()
-          setIsFocused(true)
-          // isFocused2 ? setIsFocused2(false) : setIsFocused2(true)
-          // console.log(isFocused2)
+        style={{
+          top: startPos.y + delta.y / 2,
+          left: startPos.x + delta.x / 2,
         }}
-      />
-    </svg>
+      >
+        <button
+          className="group group flex items-center justify-center rounded-full border-[3px] border-red-400 bg-red-400 p-1.5 text-white transition-[background-color,border-color] hover:bg-white hover:text-red-400"
+          onClick={onDelete}
+        >
+          <FiTrash2
+            size="18px"
+            className="transition group-hover:scale-110 group-hover:stroke-[2px]"
+          />
+        </button>
+      </div>
+    </>
   )
 }
 
