@@ -7,12 +7,10 @@ const useCursorPos = (keepUpdate: boolean) => {
 
   useEffect(() => {
     const listener = throttle(10, (e: MouseEvent) => {
-      if (keepUpdate) {
-        setPos({
-          x: e.clientX,
-          y: e.clientY,
-        })
-      }
+      setPos({
+        x: e.clientX,
+        y: e.clientY,
+      })
     })
 
     window.addEventListener("pointermove", listener)
