@@ -11,7 +11,7 @@
     "format": "prettier --ignore-path .prettierignore --check .",
     "format:fix": "yarn format --write",
     "type-check": "yarn tsc --noEmit",
-    "ci": "run-p lint format type-check",
+    "check": "run-p lint format type-check",
     "fix": "run-p lint:fix format:fix type-check"
   },
   "dependencies": {
@@ -19,10 +19,13 @@
     "@emotion/styled": "^11.9.3",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.9.0",
-    "next": "12.1.6",
+    "classnames": "^2.3.1",
+    "next": "^12.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-draggable": "^4.4.5",
     "react-icons": "^4.4.0",
+    "throttle-debounce": "^5.0.0",
     "tss-react": "^3.7.1"
   },
   "devDependencies": {
@@ -30,9 +33,10 @@
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",
+    "@types/throttle-debounce": "^5.0.0",
     "autoprefixer": "^10.4.7",
     "eslint": "^8.18.0",
-    "eslint-config-next": "12.1.6",
+    "eslint-config-next": "^12.1.6",
     "eslint-config-prettier": "^8.5.0",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.14",
