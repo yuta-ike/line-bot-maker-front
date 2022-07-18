@@ -1,8 +1,8 @@
 import classNames from "classnames"
-import { useCallback, useId, useMemo, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import Draggable from "react-draggable"
 import { calcEdgeId, getPointPos, isSameEdge } from "./editor/helper"
-import { Coordinate, Edge, GraphNodeClass } from "./editor/node"
+import { Coordinate, Edge, GraphNode, GraphNodeClass } from "./editor/node"
 import useCursorPos from "./utils/getCursorPos"
 import Line from "./Line"
 import LineUI from "./presentation/LineUI"
@@ -11,6 +11,7 @@ import TextOutputNode from "./nodetypes/TextOutputNode"
 import CorrespondCheckNode from "./nodetypes/CorrespondCheckNode"
 import IncludeCheckNode from "./nodetypes/IncludeCheckNode"
 import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
+import { FiCopy, FiTrash2 } from "react-icons/fi"
 
 //nodeのサイズ
 //使われていない
@@ -286,6 +287,28 @@ const ComponentsSideList: React.FC = () => {
     }
   }, [getNode, tmpEdgeStartNodeId])
 
+  // NOTE: ノードが削除された場合に、関連するエッジも削除する
+  useEffect(() => {
+    const nodeIds = nodes.map(({ id }) => id)
+    setEdges((edges) =>
+      edges.filter((edge) => nodeIds.includes(edge.start.nodeId)),
+    )
+  }, [nodes])
+
+  // NOTE: ノードの削除
+  const handleDelete = useCallback((node: GraphNode) => {
+    setNodes((nodes) => nodes.filter(({ id }) => id !== node.id))
+  }, [])
+
+  // NOTE: ノードの複製
+  const handleDuplicate = useCallback((node: GraphNodeClass) => {
+    const duplicatedNodePos = {
+      x: node.pos.x + 250,
+      y: node.pos.y,
+    }
+    setNodes((nodes) => [...nodes, node.duplicate(duplicatedNodePos)])
+  }, [])
+
   //カーソルのpositionをチェック
   const cursorPos = useCursorPos(tmpEdgeStartNodeId != null)
 
@@ -375,145 +398,178 @@ const ComponentsSideList: React.FC = () => {
         )
       })}
 
-      {nodes.map((node) => (
-        <Draggable
-          key={node.id}
-          position={node.pos}
-          bounds=".draggable-parent"
-          defaultClassName="!absolute top-0 left-0"
-          defaultClassNameDragging="group"
-          //dataはカーソルの位置が入る？
-          onDrag={(_, data) =>
-            setNodes((nodes) =>
-              nodes.map((n) =>
-                n.id !== node.id
-                  ? n
-                  : n.setPos({
-                      x: Math.round(data.x),
-                      y: Math.round(data.y),
-                    }),
-              ),
-            )
-          }
-          onStart={() => regenerateNode(node)}
-        >
-          <div>
-            {/* <> */}
-            {/* nodeの大枠を決める */}
-            <div
-              className={classNames(
-                "relative flex h-20 w-40 items-center justify-center rounded text-white shadow transition",
-                focusItemId?.type === "node" &&
-                  focusItemId.nodeId === node.id &&
-                  "ring-4 ring-blue-400 group-hover:shadow-2xl group-hover:ring-0",
-              )}
-              style={{ background: node.node.color }}
-              onClick={() =>
-                setFocusItemId({
-                  type: "node",
-                  nodeId: node.id,
-                })
-              }
-            >
-              {/* nodeの名前 */}
-              {/* {node.node.label} */}
-              {checkNodeType(node)}
-              {/* ここに機能を追加する */}
-              {/* inPointsの描画 */}
-              {/* <> */}
-              {/* {checkNodeType(node.node.nodeType)} */}
-              {/* 位置 */}
-              <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
-                {/* 機能 */}
-                {node.inPoints.map((point, i) => {
-                  const isConnectableWithTempNode =
-                    tmpEdgeStartNode != null &&
-                    node.canConnect(
-                      i,
-                      tmpEdgeStartNode.node,
-                      tmpEdgeStartNode.pointId,
-                    )
+      {nodes.map((node) => {
+        const isFocused =
+          focusItemId?.type === "node" && focusItemId.nodeId === node.id
+        return (
+          <Draggable
+            key={node.id}
+            position={node.pos}
+            bounds=".draggable-parent"
+            defaultClassName="!absolute top-0 left-0"
+            defaultClassNameDragging="group"
+            //dataはカーソルの位置が入る？
+            onDrag={(_, data) =>
+              setNodes((nodes) =>
+                nodes.map((n) =>
+                  n.id !== node.id
+                    ? n
+                    : n.setPos({
+                        x: Math.round(data.x),
+                        y: Math.round(data.y),
+                      }),
+                ),
+              )
+            }
+            onStart={() => regenerateNode(node)}
+          >
+            <div>
+              {/* コピーと削除のボタン */}
+              {/* TODO: 現在はフォーカスされている時に表示されるが、うざいので改善したい */}
+              <div
+                className={classNames(
+                  "absolute top-0 ml-2 flex flex-col space-y-1 transition-[left]",
+                  isFocused ? "left-full" : "left-0",
+                )}
+              >
+                <button
+                  className="flex w-max items-center space-x-1 rounded bg-blue-400 px-2 py-1 text-sm text-white"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDuplicate(node)
+                  }}
+                >
+                  <FiCopy size="16px" />
+                  <span>コピー</span>
+                </button>
+                <button
+                  className="flex w-max items-center space-x-1 rounded bg-red-400 px-2 py-1 text-sm text-white"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDelete(node)
+                  }}
+                >
+                  <FiTrash2 size="16px" />
+                  <span>ゴミ箱</span>
+                </button>
+              </div>
 
-                  return (
+              {/* <> */}
+              {/* nodeの大枠を決める */}
+              <div
+                className={classNames(
+                  "relative flex h-20 w-40 items-center justify-center rounded text-white shadow transition",
+                  isFocused &&
+                    "ring-4 ring-blue-400 group-hover:shadow-2xl group-hover:ring-0",
+                )}
+                style={{ background: node.node.color }}
+                onClick={() =>
+                  setFocusItemId({
+                    type: "node",
+                    nodeId: node.id,
+                  })
+                }
+              >
+                {/* nodeの名前 */}
+                {/* {node.node.label} */}
+                {checkNodeType(node)}
+                {/* ここに機能を追加する */}
+                {/* inPointsの描画 */}
+                {/* <> */}
+                {/* {checkNodeType(node.node.nodeType)} */}
+                {/* 位置 */}
+                <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
+                  {/* 機能 */}
+                  {node.inPoints.map((point, i) => {
+                    const isConnectableWithTempNode =
+                      tmpEdgeStartNode != null &&
+                      node.canConnect(
+                        i,
+                        tmpEdgeStartNode.node,
+                        tmpEdgeStartNode.pointId,
+                      )
+
+                    return (
+                      <button
+                        key={i}
+                        className="relative"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (!isConnectableWithTempNode) {
+                            return
+                          }
+                          const edge = {
+                            start: {
+                              nodeId: tmpEdgeStartNode.node.id,
+                              pointId: tmpEdgeStartNode.pointId,
+                            },
+                            end: {
+                              nodeId: node.id,
+                              pointId: i,
+                            },
+                          }
+                          setEdges((prev) => [...prev, edge])
+                          setTempEdgeStartNodeId(null)
+                        }}
+                      >
+                        {/* inputを選択しているときに，つなげられる可能性のある点の色分け */}
+                        <div
+                          className={classNames(
+                            "h-5 w-5 rounded-full border-2 border-white transition",
+                            tmpEdgeStartNodeId == null
+                              ? "border-white bg-green-500 hover:scale-110"
+                              : isConnectableWithTempNode
+                              ? "scale-100 border-white bg-green-500 hover:scale-110"
+                              : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
+                          )}
+                        />
+                        {/* inputの文字 */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                          {point.label}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+                {/* outPointsの描画 */}
+                <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 justify-evenly">
+                  {node.outPoints.map((point, i) => (
                     <button
                       key={i}
                       className="relative"
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (!isConnectableWithTempNode) {
+                        if (tmpEdgeStartNode != null) {
                           return
                         }
-                        const edge = {
-                          start: {
-                            nodeId: tmpEdgeStartNode.node.id,
-                            pointId: tmpEdgeStartNode.pointId,
-                          },
-                          end: {
-                            nodeId: node.id,
-                            pointId: i,
-                          },
-                        }
-                        setEdges((prev) => [...prev, edge])
-                        setTempEdgeStartNodeId(null)
+                        setFocusItemId(null)
+                        setTempEdgeStartNodeId({ nodeId: node.id, pointId: i })
                       }}
                     >
-                      {/* inputを選択しているときに，つなげられる可能性のある点の色分け */}
+                      {/* inPointsを選択中に，outPointsの色を変更する */}
                       <div
                         className={classNames(
                           "h-5 w-5 rounded-full border-2 border-white transition",
                           tmpEdgeStartNodeId == null
-                            ? "border-white bg-green-500 hover:scale-110"
-                            : isConnectableWithTempNode
-                            ? "scale-100 border-white bg-green-500 hover:scale-110"
-                            : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
+                            ? "bg-yellow-500 hover:scale-110"
+                            : "scale-50 cursor-not-allowed bg-gray-300",
                         )}
                       />
-                      {/* inputの文字 */}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                      {/* outputの文字 */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
                         {point.label}
                       </div>
                     </button>
-                  )
-                })}
+                  ))}
+                </div>
+                {/* </> */}
               </div>
-              {/* outPointsの描画 */}
-              <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 justify-evenly">
-                {node.outPoints.map((point, i) => (
-                  <button
-                    key={i}
-                    className="relative"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (tmpEdgeStartNode != null) {
-                        return
-                      }
-                      setFocusItemId(null)
-                      setTempEdgeStartNodeId({ nodeId: node.id, pointId: i })
-                    }}
-                  >
-                    {/* inPointsを選択中に，outPointsの色を変更する */}
-                    <div
-                      className={classNames(
-                        "h-5 w-5 rounded-full border-2 border-white transition",
-                        tmpEdgeStartNodeId == null
-                          ? "bg-yellow-500 hover:scale-110"
-                          : "scale-50 cursor-not-allowed bg-gray-300",
-                      )}
-                    />
-                    {/* outputの文字 */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
-                      {point.label}
-                    </div>
-                  </button>
-                ))}
-              </div>
+              {/* {checkNodeType(node.node.nodeType)} */}
               {/* </> */}
             </div>
-            {/* {checkNodeType(node.node.nodeType)} */}
-            {/* </> */}
-          </div>
-        </Draggable>
-      ))}
+          </Draggable>
+        )
+      })}
     </div>
   )
 }
