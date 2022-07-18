@@ -1,22 +1,31 @@
 import React from "react"
-import { Edge, GraphNode } from "./editor/node"
+import { GraphNode } from "./editor/node"
 import { getPointPos } from "./editor/helper"
 import LineUI from "./presentation/LineUI"
 
 export type LineProps = {
-  edge: Edge
-  getNode: (nodeId: string) => GraphNode | null
+  start: {
+    node: GraphNode
+    pointId: number
+  }
+  end: {
+    node: GraphNode
+    pointId: number
+  }
+  isFocused: boolean
+  onFocus: () => void
   onDelete: () => void
 }
 
-const Line: React.FC<LineProps> = ({ edge, getNode, onDelete }) => {
-  const startNode = getNode(edge.start.nodeId)
-  const endNode = getNode(edge.end.nodeId)
-  if (startNode == null || endNode == null) {
-    return null
-  }
-  const startPointPos = getPointPos("out", startNode, edge.start.pointId)
-  const endPointPos = getPointPos("in", endNode, edge.end.pointId)
+const Line: React.FC<LineProps> = ({
+  start,
+  end,
+  isFocused,
+  onFocus,
+  onDelete,
+}) => {
+  const startPointPos = getPointPos("out", start.node, start.pointId)
+  const endPointPos = getPointPos("in", end.node, end.pointId)
   const deltaX = endPointPos.x - startPointPos.x
   const deltaY = endPointPos.y - startPointPos.y
   return (
@@ -24,6 +33,8 @@ const Line: React.FC<LineProps> = ({ edge, getNode, onDelete }) => {
       <LineUI
         startPos={startPointPos}
         delta={{ x: deltaX, y: deltaY }}
+        isFocused={isFocused}
+        onFocus={onFocus}
         onDelete={onDelete}
       />
     </div>
