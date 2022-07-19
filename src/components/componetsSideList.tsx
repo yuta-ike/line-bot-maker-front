@@ -1,5 +1,12 @@
 import classNames from "classnames"
-import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react"
 import Draggable from "react-draggable"
 import { calcEdgeId, getPointPos, isSameEdge } from "./editor/helper"
 import { Coordinate, Edge, GraphNode, GraphNodeClass } from "./editor/node"
@@ -13,6 +20,8 @@ import IncludeCheckNode from "./nodetypes/IncludeCheckNode"
 import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
 import { FiCopy, FiTrash2 } from "react-icons/fi"
 import TestCaseComponent from "./TestCaseComponent"
+import execFlowChart from "../interpreter/exec"
+import { FiAlertCircle } from "react-icons/fi"
 
 //nodeのサイズ
 //使われていない
@@ -112,6 +121,7 @@ const INIT_NODES = [
         // { type: "number", label: "input", limit: null }
       ],
       outPoints: [{ type: "number", label: "confirmed", limit: null }],
+      isInitialNode: true,
     },
   ),
   new GraphNodeClass(
@@ -130,6 +140,7 @@ const INIT_NODES = [
         { type: "number", label: "yes", limit: null },
         { type: "number", label: "no", limit: null },
       ],
+      isInitialNode: true,
     },
   ),
   new GraphNodeClass(
@@ -148,6 +159,7 @@ const INIT_NODES = [
         { type: "number", label: "yes", limit: null },
         { type: "number", label: "no", limit: null },
       ],
+      isInitialNode: true,
     },
   ),
   new GraphNodeClass(
@@ -166,6 +178,7 @@ const INIT_NODES = [
         // { type: "number", label: "yes", limit: null },
         // { type: "number", label: "no", limit: null },
       ],
+      isInitialNode: true,
     },
   ),
   new GraphNodeClass(
@@ -185,6 +198,7 @@ const INIT_NODES = [
         { type: "number", label: "cloudy", limit: null },
         { type: "number", label: "rainy", limit: null },
       ],
+      isInitialNode: true,
     },
   ),
 ]
@@ -214,7 +228,7 @@ const checkNodeType = (node: GraphNodeClass) => {
 const ComponentsSideList: React.FC = () => {
   //nodeとedgeの状態管理　えｄげは線
   const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
-  const [createdNodes, setCreatedNodes] = useState<GraphNodeClass[]>([])
+  // const [createdNodes, setCreatedNodes] = useState<GraphNodeClass[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
 
   const [focusItemId, setFocusItemId] = useState<
@@ -252,24 +266,26 @@ const ComponentsSideList: React.FC = () => {
             pos: node.pos,
             inPoints: node.inPoints,
             outPoints: node.outPoints,
+            isInitialNode: true,
           },
         ),
       )
-      createdNodes.push(
-        //ここでダイレクトにnodeを追加すると同じnodeオブジェクトをnodeをnodesに追加することになるので，もとのnodeと同じ情報をもつnodeを新たに生成する（idは異なる）
-        new GraphNodeClass(
-          {
-            label: node.node.label,
-            color: node.node.color,
-            nodeType: node.node.nodeType,
-          },
-          {
-            pos: node.pos,
-            inPoints: node.inPoints,
-            outPoints: node.outPoints,
-          },
-        ),
-      )
+      // createdNodes.push(
+      //   //ここでダイレクトにnodeを追加すると同じnodeオブジェクトをnodeをnodesに追加することになるので，もとのnodeと同じ情報をもつnodeを新たに生成する（idは異なる）
+      //   new GraphNodeClass(
+      //     {
+      //       label: node.node.label,
+      //       color: node.node.color,
+      //       nodeType: node.node.nodeType,
+      //     },
+      //     {
+      //       pos: node.pos,
+      //       inPoints: node.inPoints,
+      //       outPoints: node.outPoints,
+      //       isInitialNode: true,
+      //     },
+      //   ),
+      // )
     }
   }
 
@@ -315,6 +331,11 @@ const ComponentsSideList: React.FC = () => {
   // NOTE: ノードの削除
   const handleDelete = useCallback((node: GraphNode) => {
     setNodes((nodes) => nodes.filter(({ id }) => id !== node.id))
+    setEdges((edges) =>
+      edges.filter(
+        ({ start, end }) => start.nodeId !== node.id && end.nodeId !== node.id,
+      ),
+    )
   }, [])
 
   // NOTE: ノードの複製
@@ -331,9 +352,104 @@ const ComponentsSideList: React.FC = () => {
 
   const rootId = useId()
 
+  const [testcase, setTestcase] = useState("Hello")
+  const [testError, setTestError] = useState<string | null>(null)
+
+  const result = useMemo(() => {
+    try {
+      // console.log(nodes)
+      console.log(nodes.filter(({ isInitialNode }) => !isInitialNode))
+      console.log(edges)
+      const result = execFlowChart(
+        nodes
+          .filter(({ isInitialNode }) => !isInitialNode)
+          .map((node) => {
+            const relatedEdges = edges.filter(
+              ({ start }) => start.nodeId === node.id,
+            )
+            return {
+              id: node.id,
+              node: {
+                ...node,
+                type: node.node.nodeType as
+                  | "textInputNode"
+                  | "correspondCheckNode"
+                  | "textOutputNode"
+                  | "nop",
+                userInputValue: node.createrInputValue,
+              },
+              outputs: relatedEdges.map(({ end }) => end.nodeId),
+            }
+          }),
+        {
+          message: testcase,
+        },
+      )
+      setTestError(null)
+      return result
+    } catch (e: any) {
+      console.log(e)
+      setTestError(e.message)
+    }
+  }, [edges, nodes, testcase])
+
   return (
     //枠線の指定
     <div className="flex">
+      <div className="fixed inset-y-0 right-0 m-4 flex w-max max-w-[30%] flex-col space-y-2 break-all rounded border-2 border-[#efefef] bg-white/50 p-4 backdrop-blur">
+        <div>
+          <div className="text-sm text-gray-500">入力</div>
+          <input
+            type="text"
+            className="rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+            placeholder="入力値"
+            value={testcase}
+            onChange={(e) => setTestcase(e.target.value)}
+          />
+        </div>
+        <div>
+          <div className="text-sm text-gray-500">出力</div>
+          <input
+            className="rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none"
+            value={result?.value || "<入力なし>"}
+            disabled
+            placeholder="出力"
+          />
+        </div>
+
+        <div>
+          {result?.stackTrace.map((trace, i) => (
+            <div key={i}>
+              {trace.result === "success" ? (
+                <>
+                  <span className="text-sm">#{trace.nodeId}</span>
+                  <br />
+                  <code className="bg-blue-100">
+                    {trace.inMessage || "<入力なし>"}
+                  </code>{" "}
+                  to{" "}
+                  <code className="bg-blue-100">
+                    {trace.outMessage || "<入力なし>"}
+                  </code>
+                </>
+              ) : (
+                <>
+                  {trace.nodeId}
+                  <br />
+                  <code className="bg-blue-100">{trace.inMessage}</code>
+                  <br />
+                  {trace.error}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center space-x-1 text-sm text-red-500">
+          <FiAlertCircle className="shrink-0" />
+          <span>{testError}</span>
+        </div>
+      </div>
       <div
         id={rootId}
         className="draggable-parent static min-h-screen flex-grow border border-blue-100"
@@ -439,7 +555,11 @@ const ComponentsSideList: React.FC = () => {
                   ),
                 )
               }
-              onStart={() => regenerateNode(node)}
+              onStart={() => {
+                regenerateNode(node)
+                // NOTE: 本当は良くない
+                node.isInitialNode = false
+              }}
             >
               <div>
                 {/* コピーと削除のボタン */}
@@ -592,7 +712,7 @@ const ComponentsSideList: React.FC = () => {
           )
         })}
       </div>
-      <TestCaseComponent nodes={createdNodes}></TestCaseComponent>
+      {/* <TestCaseComponent nodes={createdNodes}></TestCaseComponent> */}
     </div>
   )
 }

@@ -13,7 +13,6 @@ const CorrespondCheckNode: React.FC<Props> = (props) => {
       node.createrInputValue = inputedText
     }
     updateUserInputValue()
-    console.log(node.createrInputValue)
   }, [inputedText, node])
 
   return (

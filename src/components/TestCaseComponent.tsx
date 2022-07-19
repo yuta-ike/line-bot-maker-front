@@ -15,7 +15,7 @@ const TestCaseComponent = (props: any) => {
     return node.node.nodeType === "WeatherCheckNode"
   })
 
-  console.log(nodes.length)
+  // console.log(nodes.length)
   return <>hogehoge</>
 }
 

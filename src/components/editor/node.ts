@@ -12,6 +12,7 @@ export type GraphNode = {
     label: string
     limit: number | null
   }[]
+  createrInputValue: string
 }
 
 export type EditorNode = {
@@ -70,6 +71,8 @@ export class GraphNodeClass {
   //これはユーザがノードに記入する値（例えば，TextInputNodeであるならば，質問文）
   public createrInputValue = ""
 
+  public isInitialNode: boolean
+
   constructor(
     node: EditorNode,
     {
@@ -77,11 +80,13 @@ export class GraphNodeClass {
       inPoints,
       outPoints,
       createrInputValue,
+      isInitialNode = false,
     }: {
       pos?: Coordinate //44l、三項演算子、値が入っていないとFalse判定で宣言
       inPoints?: Point[] //38l
       outPoints?: Point[]
       createrInputValue?: string
+      isInitialNode?: boolean
     } = {},
   ) {
     this.id = `${GraphNodeClass.id++}` //idはGlaphNodeClassが呼び出される度に自動でインクリメント
@@ -90,6 +95,7 @@ export class GraphNodeClass {
     this.inPoints = inPoints ?? []
     this.outPoints = outPoints ?? []
     this.createrInputValue = createrInputValue ?? ""
+    this.isInitialNode = isInitialNode
   }
 
   setPos(coordinate: Coordinate) {
