@@ -76,10 +76,12 @@ export class GraphNodeClass {
       pos,
       inPoints,
       outPoints,
+      createrInputValue,
     }: {
       pos?: Coordinate //44l、三項演算子、値が入っていないとFalse判定で宣言
       inPoints?: Point[] //38l
       outPoints?: Point[]
+      createrInputValue?: string
     } = {},
   ) {
     this.id = `${GraphNodeClass.id++}` //idはGlaphNodeClassが呼び出される度に自動でインクリメント
@@ -87,11 +89,21 @@ export class GraphNodeClass {
     this.pos = pos ?? { x: 0, y: 0 } //null合体代入、posがnullなら初期座標として(0,0)を代入
     this.inPoints = inPoints ?? []
     this.outPoints = outPoints ?? []
+    this.createrInputValue = createrInputValue ?? ""
   }
 
   setPos(coordinate: Coordinate) {
     this.pos = coordinate
     return this
+  }
+
+  duplicate(pos: Coordinate = { ...this.pos }) {
+    return new GraphNodeClass(structuredClone(this.node), {
+      pos,
+      inPoints: structuredClone(this.inPoints),
+      outPoints: structuredClone(this.outPoints),
+      createrInputValue: this.createrInputValue,
+    })
   }
 
   canConnect(
