@@ -1,9 +1,15 @@
-import { useState } from "react"
+// import liff from "@line/liff/dist/lib"
+
+import { useContext, useState } from "react"
 import Modal from "react-modal"
+import { useLiff, useLiffContext } from "../provider/LiffProvider"
 import ReleasePopUp from "./presentation/ReleasePopUp"
 
 const BottomBar = () => {
   const [modalIsOpen, setIsOpen] = useState(false)
+  //const  = useContext(LiffContext)
+  const liff = useLiff()
+  //const liff2 = useLiff
   // モーダルを開く処理
   const openModal = () => {
     setIsOpen(true)
@@ -15,6 +21,22 @@ const BottomBar = () => {
 
   // モーダルを閉じる処理
   const closeModal = () => {
+    setIsOpen(false)
+  }
+
+  // 友達にシェアする処理
+  const shareLink = () => {
+    liff!
+      .shareTargetPicker([
+        {
+          type: "text",
+          text: "this is a test",
+        },
+      ])
+      .then()
+      .catch(function (res) {
+        console.log(res)
+      })
     setIsOpen(false)
   }
   // モーダルを画面中央に表示する用のスタイル
@@ -69,12 +91,18 @@ const BottomBar = () => {
             // モーダルを閉じる処理を定義
             onRequestClose={closeModal}
           >
-            <h1>こんにちは！！</h1>
+            <h1>Botを公開しました！！</h1>
             <button
               className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center shadow-md"
               onClick={closeModal}
             >
               close
+            </button>
+            <button
+              className="m-4 h-12 w-40 rounded bg-red-300 p-4 text-center shadow-md"
+              onClick={shareLink}
+            >
+              友達にシェアする
             </button>
           </Modal>
         </div>

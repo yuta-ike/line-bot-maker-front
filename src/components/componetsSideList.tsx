@@ -596,7 +596,7 @@ const ComponentsSideList: React.FC = () => {
                 {/* nodeの大枠を決める */}
                 <div
                   className={classNames(
-                    "relative flex h-20 w-40 items-center justify-center rounded text-white shadow transition",
+                    "relative flex h-[90px] w-40 items-center justify-center rounded text-white shadow transition",
                     isFocused &&
                       "ring-4 ring-blue-400 group-hover:shadow-2xl group-hover:ring-0",
                   )}

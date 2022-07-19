@@ -28,7 +28,7 @@ const ReleasePopUp = () => {
         // モーダルを閉じる処理を定義
         onRequestClose={closeModal}
       >
-        <h2>Hello</h2>
+        <h2>Botを公開しました！！</h2>
         <button onClick={closeModal}>close</button>
       </Modal>
     </>
