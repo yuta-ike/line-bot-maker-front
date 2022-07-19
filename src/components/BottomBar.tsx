@@ -1,10 +1,15 @@
-import liff from "@line/liff/dist/lib"
-import { useState } from "react"
+// import liff from "@line/liff/dist/lib"
+
+import { useContext, useState } from "react"
 import Modal from "react-modal"
+import { useLiff, useLiffContext } from "../provider/LiffProvider"
 import ReleasePopUp from "./presentation/ReleasePopUp"
 
 const BottomBar = () => {
   const [modalIsOpen, setIsOpen] = useState(false)
+  //const  = useContext(LiffContext)
+  const liff = useLiff()
+  //const liff2 = useLiff
   // モーダルを開く処理
   const openModal = () => {
     setIsOpen(true)
@@ -21,7 +26,7 @@ const BottomBar = () => {
 
   // 友達にシェアする処理
   const shareLink = () => {
-    liff
+    liff!
       .shareTargetPicker([
         {
           type: "text",
