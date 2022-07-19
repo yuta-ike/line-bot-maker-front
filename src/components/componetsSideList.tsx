@@ -295,7 +295,7 @@ const ComponentsSideList: React.FC = () => {
     //枠線の指定
     <div
       id={rootId}
-      className="draggable-parent static min-h-screen border border-blue-100"
+      className="draggable-parent static min-h-screen flex-grow border border-blue-100"
       onClick={(e) => {
         // @ts-ignore
         if (e.target.id === rootId) {
