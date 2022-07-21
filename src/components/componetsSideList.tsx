@@ -20,8 +20,9 @@ import IncludeCheckNode from "./nodetypes/IncludeCheckNode"
 import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
 import { FiCopy, FiTrash2 } from "react-icons/fi"
 import TestCaseComponent from "./TestCaseComponent"
-import execFlowChart from "../interpreter/exec"
+import execFlowChart from "../interpreter"
 import { FiAlertCircle } from "react-icons/fi"
+import { InterpreterError } from "../interpreter/error"
 
 //nodeのサイズ
 //使われていない
@@ -353,13 +354,9 @@ const ComponentsSideList: React.FC = () => {
   const rootId = useId()
 
   const [testcase, setTestcase] = useState("Hello")
-  const [testError, setTestError] = useState<string | null>(null)
 
   const result = useMemo(() => {
     try {
-      // console.log(nodes)
-      console.log(nodes.filter(({ isInitialNode }) => !isInitialNode))
-      console.log(edges)
       const result = execFlowChart(
         nodes
           .filter(({ isInitialNode }) => !isInitialNode)
@@ -385,18 +382,27 @@ const ComponentsSideList: React.FC = () => {
           message: testcase,
         },
       )
-      setTestError(null)
-      return result
-    } catch (e: any) {
-      console.log(e)
-      setTestError(e.message)
+      return {
+        ...result,
+        error: null,
+      }
+    } catch (e: unknown) {
+      if (e instanceof InterpreterError) {
+        return {
+          value: null,
+          stackTrace: e.stackTrace,
+          error: e,
+        }
+      } else {
+        throw e
+      }
     }
   }, [edges, nodes, testcase])
 
   return (
     //枠線の指定
     <div className="flex">
-      <div className="fixed inset-y-0 right-0 m-4 flex w-max max-w-[30%] flex-col space-y-2 break-all rounded border-2 border-[#efefef] bg-white/50 p-4 backdrop-blur">
+      <div className="fixed inset-y-0 right-0 m-4 flex w-max max-w-[30%] flex-col space-y-2 overflow-y-scroll break-all rounded border-2 border-[#efefef] bg-white/50 p-4 backdrop-blur">
         <div>
           <div className="text-sm text-gray-500">入力</div>
           <input
@@ -410,15 +416,18 @@ const ComponentsSideList: React.FC = () => {
         <div>
           <div className="text-sm text-gray-500">出力</div>
           <input
-            className="rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none"
-            value={result?.value || "<入力なし>"}
+            className={classNames(
+              "rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none",
+              (result == null || result?.value === "") && "text-gray-300",
+            )}
+            value={result?.value || "<値なし>"}
             disabled
             placeholder="出力"
           />
         </div>
 
         <div>
-          {result?.stackTrace.map((trace, i) => (
+          {result?.stackTrace?.map((trace, i) => (
             <div key={i}>
               {trace.result === "success" ? (
                 <>
@@ -445,10 +454,12 @@ const ComponentsSideList: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center space-x-1 text-sm text-red-500">
-          <FiAlertCircle className="shrink-0" />
-          <span>{testError}</span>
-        </div>
+        {result.error?.message != null && (
+          <div className="flex items-center space-x-1 text-sm text-red-500">
+            <FiAlertCircle className="shrink-0" />
+            <span>{result.error.message}</span>
+          </div>
+        )}
       </div>
       <div
         id={rootId}
