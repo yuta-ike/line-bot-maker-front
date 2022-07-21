@@ -1,17 +1,19 @@
-// import liff from "@line/liff/dist/lib"
-
-import { useContext, useState } from "react"
+import { useState } from "react"
 import Modal from "react-modal"
-import { useLiff, useLiffContext } from "../provider/LiffProvider"
-import ReleasePopUp from "./presentation/ReleasePopUp"
+import { useLiff } from "../provider/LiffProvider"
 
-const BottomBar = () => {
+export type BottomBarProps = {
+  onSave: () => Promise<void> | void
+}
+
+const BottomBar: React.FC<BottomBarProps> = () => {
   const [modalIsOpen, setIsOpen] = useState(false)
   //const  = useContext(LiffContext)
   const liff = useLiff()
   //const liff2 = useLiff
   // モーダルを開く処理
-  const openModal = () => {
+  const openModal = async () => {
+    await handleSave()
     setIsOpen(true)
   }
 
@@ -51,22 +53,24 @@ const BottomBar = () => {
     },
   }
 
+  const handleSave = async () => {}
+
   return (
     <>
-      <div className="flex justify-between">
-        <div
-          className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center shadow-md"
-          onClick={() => {}}
+      <div className="fixed inset-x-0 bottom-0 flex justify-between">
+        <button
+          className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+          onClick={() => window.alert("未実装です")}
         >
           消去
-        </div>
+        </button>
         <div className="flex">
-          <div
-            className="w-30 m-4 h-12 rounded bg-gray-300 p-4 text-center shadow-md"
-            onClick={() => {}}
+          <button
+            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            onClick={handleSave}
           >
-            一時保存
-          </div>
+            保存
+          </button>
           {/* <div
             className="m-4 h-12 w-20 rounded bg-red-300 p-4 text-center shadow-md"
             onClick={() => {
@@ -76,10 +80,10 @@ const BottomBar = () => {
             公開
           </div> */}
           <button
-            className="m-4 h-12 w-20 rounded bg-red-300 p-4 text-center shadow-md"
+            className="m-4 h-12 rounded bg-red-300 p-4 text-center leading-none shadow-md"
             onClick={openModal}
           >
-            公開
+            保存して公開
           </button>
           <Modal
             //className={"flex bg-green-300"}
@@ -91,15 +95,15 @@ const BottomBar = () => {
             // モーダルを閉じる処理を定義
             onRequestClose={closeModal}
           >
-            <h1>Botを公開しました！！</h1>
+            <h1>Botを保存しました！！</h1>
             <button
-              className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center shadow-md"
+              className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
               onClick={closeModal}
             >
               close
             </button>
             <button
-              className="m-4 h-12 w-40 rounded bg-red-300 p-4 text-center shadow-md"
+              className="m-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
               onClick={shareLink}
             >
               友達にシェアする
