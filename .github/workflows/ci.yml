@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: 14.x
           cache: npm
+      - name: install npm
+        run: npm i -g npm@latest
       - name: install npm packages
         run: npm ci
       - name: Run lint and formatter
