@@ -1,14 +1,14 @@
-import React from "react"
+import React, { useState } from "react"
+import Image from "next/image"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
 import Typography from "@mui/material/Typography"
-import Button from "@mui/material/Button"
 import IconButton from "@mui/material/IconButton"
 import MenuIcon from "@mui/icons-material/Menu"
 import { createTheme } from "@mui/material/styles"
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"
 import { css } from "@mui/styled-engine"
 import { ThemeProvider } from "@mui/material/styles"
+import { useLiffOperation, useUser } from "../provider/LiffProvider"
 
 const classes = {
   root: {
@@ -24,6 +24,7 @@ const classes = {
   iconimage: {
     width: 32,
     height: 32,
+    borderRadius: 999,
   },
   menuButton: {
     marginRight: 8,
@@ -44,7 +45,10 @@ const theme = createTheme({
   },
 })
 
-export default function ButtonAppBar() {
+const Header: React.FC = () => {
+  const { logout } = useLiffOperation()
+  const user = useUser()
+
   return (
     <ThemeProvider theme={theme}>
       <div css={css(classes.root)}>
@@ -65,20 +69,51 @@ export default function ButtonAppBar() {
             >
               Line Bot Maker
             </Typography>
-            <IconButton
-              edge="end"
-              css={css(classes.menuButton)}
-              style={{ color: "#f8faf7" }}
-              aria-label="menu"
-            >
-              <img
-                src="C:\Users\matsuri.passion1015\Pictures\Foodie\2021-11-18-13-54-59-245.jpg"
-                css={css(classes.iconimage)}
-              />
-            </IconButton>
+            {user?.iconUrl != null && (
+              <div className="relative">
+                <IconButton
+                  edge="end"
+                  css={css(classes.menuButton)}
+                  style={{ color: "#f8faf7" }}
+                  aria-label="menu"
+                  className="peer"
+                >
+                  <Image
+                    src={user.iconUrl}
+                    css={css(classes.iconimage)}
+                    alt=""
+                    width="32px"
+                    height="32px"
+                  />
+                </IconButton>
+                <div className="absolute top-full right-0 hidden w-[240px] flex-col rounded bg-white shadow-md peer-focus:flex">
+                  <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
+                    <Image
+                      src={user.iconUrl}
+                      css={css(classes.iconimage)}
+                      alt=""
+                      className="shrink-0"
+                      width="32px"
+                      height="32px"
+                    />
+                    <span className="block">{user.name}</span>
+                  </div>
+                  <button
+                    className="px-4 py-3 text-left transition hover:bg-gray-100"
+                    onClick={async () => {
+                      await logout()
+                    }}
+                  >
+                    ログアウト
+                  </button>
+                </div>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
       </div>
     </ThemeProvider>
   )
 }
+
+export default Header
