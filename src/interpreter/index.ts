@@ -1,18 +1,5 @@
-import { GraphNode } from "../components/editor/node"
-
-type FlowChartNode = {
-  id: string
-  node: GraphNode
-  outputs: string[]
-}
-
-type FlowChart = FlowChartNode[]
-
-class FlowchartSyntaxError extends Error {
-  constructor(message?: string) {
-    super(message)
-  }
-}
+import { FlowchartSyntaxError, InternalError, InterpreterError } from "./error"
+import { FlowChart, StackTrace } from "./type"
 
 type FlowInputParam = {
   message: string
@@ -30,16 +17,19 @@ const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
     (chart) => chart.node.node.nodeType === "textInputNode",
   )
   if (inputNodes.length == 0) {
-    throw new FlowchartSyntaxError("入力ノードがありません")
+    throw new FlowchartSyntaxError("NO_INPUT_NODE", "入力ノードがありません")
   } else if (2 <= inputNodes.length) {
-    throw new FlowchartSyntaxError("入力ノードが複数あります")
+    throw new FlowchartSyntaxError(
+      "MULTIPLE_INPUT_NODE",
+      "入力ノードが複数あります",
+    )
   }
 
   // validation: id duplication
   const ids = flowChart.map(({ id }) => id)
   if (new Set(ids).size !== ids.length) {
     console.log(ids)
-    throw new Error("IDに重複があります")
+    throw new InternalError("ID_DUPLICATION", "IDに重複があります")
   }
 
   // validation: output node
@@ -49,7 +39,10 @@ const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
   outputNodeIds.forEach((nodeId) => {
     const node = flowChart.find(({ id }) => id === nodeId)
     if (node == null) {
-      throw new Error("Unknown node id")
+      throw new InternalError(
+        "NODE_NOT_FOUND",
+        `node id (${nodeId}) が見つかりません`,
+      )
     }
   })
 
@@ -59,6 +52,8 @@ const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
 
   let nextNodeId: string | null = inputNode.id
   let value = message
+  let done: boolean = false
+  let stepCount = 0
 
   while (nextNodeId != null) {
     const result = stepFlowChartProxy(
@@ -68,10 +63,28 @@ const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
       message,
     )
     if (result.status === "failure") {
+      result.error.stackTrace = stackTrace
       throw result.error
     }
     nextNodeId = result.nextNodeId
     value = result.value
+    done = result.done
+    stepCount += 1
+    if (stepCount > 500) {
+      throw new FlowchartSyntaxError(
+        "STACK_OVER_FLOW",
+        "無限ループになっている可能性があります",
+      )
+    }
+  }
+
+  if (!done) {
+    const error = new FlowchartSyntaxError(
+      "NO_OUTPUT_NODE",
+      "出力ノードに達していません",
+    )
+    error.stackTrace = stackTrace
+    throw error
   }
 
   return {
@@ -88,6 +101,8 @@ type FlowChartStepResult =
       nextNodeId: string | null
       // メモリに保存する値
       value: string
+      // プログラムが終了ノードに達したか
+      done: boolean
     }
   | {
       // 成功 or エラーが発生した
@@ -95,28 +110,8 @@ type FlowChartStepResult =
       // 保持する値
       value: string | null
       // エラー
-      error: Error | null
+      error: InterpreterError
     }
-
-type StackTrace = ({
-  // 実行するNode ID
-  nodeId: string | null
-  // 入力値
-  inMessage: string
-  // 結果
-  result: "success" | "failure"
-} & (
-  | {
-      result: "success"
-      // 出力値
-      outMessage: string
-    }
-  | {
-      result: "failure"
-      // エラー
-      error: Error | null
-    }
-))[]
 
 /**
  * フローチャートを1ステップ実行し、StackTraceを更新する
@@ -139,6 +134,7 @@ const stepFlowChartProxy = (
       nodeId: nextNodeId,
       inMessage: value,
       outMessage: result.value,
+      done: result.done,
     })
   } else {
     stackTrace.push({
@@ -167,7 +163,10 @@ const stepFlowChart = (
     return {
       status: "failure",
       value,
-      error: new SyntaxError("ノードが繋がっていません"),
+      error: new FlowchartSyntaxError(
+        "NODE_NOT_CONNECTED",
+        "ノードが繋がっていません",
+      ),
     }
   }
 
@@ -177,7 +176,10 @@ const stepFlowChart = (
     return {
       status: "failure",
       value,
-      error: new Error("予期せぬエラーが発生しました"),
+      error: new InternalError(
+        "NODE_NOT_FOUND",
+        `node id (${nextNodeId}) が見つかりません`,
+      ),
     }
   }
 
@@ -186,6 +188,7 @@ const stepFlowChart = (
       status: "success",
       nextNodeId: nextNode.outputs[0],
       value,
+      done: false,
     }
   }
 
@@ -195,12 +198,14 @@ const stepFlowChart = (
         status: "success",
         nextNodeId: nextNode.outputs[0],
         value,
+        done: false,
       }
     } else {
       return {
         status: "success",
         nextNodeId: nextNode.outputs[1],
         value,
+        done: false,
       }
     }
   }
@@ -211,12 +216,14 @@ const stepFlowChart = (
         status: "success",
         nextNodeId: nextNode.outputs[0],
         value,
+        done: false,
       }
     } else {
       return {
         status: "success",
         nextNodeId: nextNode.outputs[1],
         value,
+        done: false,
       }
     }
   }
@@ -226,15 +233,7 @@ const stepFlowChart = (
       status: "success",
       nextNodeId: nextNode.outputs[0],
       value,
-    }
-  }
-
-  if (nextNode.node.node.nodeType === "textOutputNode") {
-    // return [null, nextNode.node.userInputValue]
-    return {
-      status: "success",
-      value: nextNode.node.createrInputValue,
-      nextNodeId: null,
+      done: false,
     }
   }
 
@@ -242,11 +241,16 @@ const stepFlowChart = (
     // TODO: 天気のーど
   }
 
+  if (nextNode.node.node.nodeType === "textOutputNode") {
+    return {
+      status: "success",
+      value: nextNode.node.createrInputValue,
+      nextNodeId: null,
+      done: true,
+    }
+  }
+
   throw new Error("unreachable")
 }
-
-// const output = execFlowChart(flowChart, {message: "京都"})
-// console.log("OUTPUT: " + output.value)
-// console.log(output.stackTrace)
 
 export default execFlowChart
