@@ -1,10 +1,8 @@
-import axios from "axios"
 import type { NextPage } from "next"
 import { useCallback, useState } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
 import Header from "../modules/Header"
-import { useUser, useLiffOperation } from "../provider/LiffProvider"
-import { nanoid } from "nanoid"
+import { useUser } from "../provider/LiffProvider"
 import genId from "../components/utils/genId"
 import { useRouter } from "next/router"
 
@@ -42,19 +40,20 @@ const Home: NextPage = () => {
       return
     }
     try {
-      const res = await axios.post(`${API_BASE_URL}/getIdToken/bot`, {
+      const payload = {
         bot_id: genId(),
         name: "新しいプログラム",
         flowChart: "[]",
         developerId: user.id,
-      })
-      router.push(`/bot/${res.data.bot_id}`)
+      }
+      // NOTE: API呼び出し: POST /bot/:botid
+      router.push(`/bot/${payload.bot_id}`)
     } catch {
       window.alert("エラーが発生しました")
     }
   }, [router, user])
 
-  // NOTE: API呼び出し: GET /bot
+  // NOTE: API呼び出し: GET /bot (SWR or useEffect)
 
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">

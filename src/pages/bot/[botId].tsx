@@ -26,7 +26,6 @@ import { FiAlertCircle } from "react-icons/fi"
 import { InterpreterError } from "../../interpreter/error"
 import TopBar from "../../components/TopBar"
 import BottomBar from "../../components/BottomBar"
-import axios from "axios"
 import { useRouter } from "next/router"
 import { useLiff, useUser } from "../../provider/LiffProvider"
 import { FlowChart } from "../../interpreter/type"
@@ -190,7 +189,10 @@ const ComponentsSideList: React.FC = () => {
       return
     }
     ;(async () => {
-      const res = await axios.get(`${API_BASE_URL}/getIdToken/bot/${botId}`)
+      // NOTE: API呼び出しがまだ未実装なためreturn
+      return
+
+      const res = null as any // NOTE: API呼び出し: GET /bot/:botid
       const flowChart: FlowChart = JSON.parse(res.data.flowChart)
       setNodes((prev) => [
         ...prev,
@@ -387,11 +389,13 @@ const ComponentsSideList: React.FC = () => {
         }
       })
 
-    await axios.put(`${API_BASE_URL}/getIdToken/bot/${botId}`, {
+    const payload = {
       name,
       flowChart: JSON.stringify(flowchart),
       developperId: user.id,
-    })
+    }
+
+    // NOTE: API呼び出し: PUT /bot/:botid
   }
 
   /**
@@ -414,13 +418,13 @@ const ComponentsSideList: React.FC = () => {
     try {
       const res = window.confirm("本当に削除しますか？")
       if (res) {
-        await axios.delete(`${API_BASE_URL}/getIdToken/bot/${botId}`)
+        // NOTE: API呼び出し: DELETE /bot/:botid
         router.push("/")
       }
     } catch {
       window.alert("削除に失敗しました")
     }
-  }, [botId, router])
+  }, [router])
 
   const rootId = useId()
 
