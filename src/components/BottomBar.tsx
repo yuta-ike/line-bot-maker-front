@@ -1,13 +1,27 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Image from "next/image"
 import Modal from "react-modal"
+import { useSnackBar } from "./NotificationSnackBar"
+import generateQR from "./utils/genQR"
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string
 
 export type BottomBarProps = {
+  botId: string
   onSave: () => Promise<void> | void
   onShare: () => Promise<void> | void
   onDelete: () => Promise<void> | void
+  onReset: () => void
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
+const BottomBar: React.FC<BottomBarProps> = ({
+  botId,
+  onSave,
+  onShare,
+  onDelete,
+  onReset,
+}) => {
+  const showSnackBar = useSnackBar()
   const [modalIsOpen, setIsOpen] = useState(false)
 
   // モーダルを開く処理
@@ -30,7 +44,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
     try {
       await onShare()
     } catch {
-      window.alert("エラーが発生しました")
+      showSnackBar("error", "エラーが発生しました")
     } finally {
       setIsOpen(false)
     }
@@ -38,11 +52,20 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
 
   const handleSave = async () => {
     await onSave()
-    window.alert("保存しました")
+    showSnackBar("ok", "保存しました!!")
   }
 
   const handleDelete = async () => {
     await onDelete()
+  }
+
+  const handleReset = () => {
+    const res = window.confirm("リセットしますか？")
+    if (!res) {
+      return
+    }
+    onReset()
+    showSnackBar("ok", "リセットしました")
   }
 
   // モーダルを画面中央に表示する用のスタイル
@@ -57,15 +80,37 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
     },
   }
 
+  const shareUrl = `${APP_URL}/activate?botId=${botId}`
+
+  const handleCopyUrl = async () => {
+    await navigator.clipboard.writeText(shareUrl)
+    setIsOpen(false)
+    showSnackBar("ok", "URLをクリップボードにコピーしました")
+  }
+
+  const [qrImage, setQrImage] = useState("")
+
+  useEffect(() => {
+    generateQR(shareUrl).then(setQrImage)
+  }, [shareUrl])
+
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 flex justify-between">
-        <button
-          className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-          onClick={handleDelete}
-        >
-          削除
-        </button>
+        <div>
+          <button
+            className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            onClick={handleDelete}
+          >
+            削除
+          </button>
+          <button
+            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            onClick={handleReset}
+          >
+            リセット
+          </button>
+        </div>
         <div className="flex">
           <button
             className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
@@ -89,18 +134,35 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
             onRequestClose={closeModal}
           >
             <h1>Botを保存しました！！</h1>
-            <button
-              className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            {/* <button
+              className="mr-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
               onClick={closeModal}
             >
-              close
-            </button>
-            <button
-              className="m-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
-              onClick={shareLink}
-            >
-              友達にシェアする
-            </button>
+              とじる
+            </button> */}
+            <div className="flex w-full justify-center py-4">
+              <Image
+                src={qrImage}
+                alt=""
+                width="120px"
+                height="120px"
+                className="mx-auto"
+              />
+            </div>
+            <div>
+              <button
+                className="ml-4 mt-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+                onClick={handleCopyUrl}
+              >
+                共有URLをコピー
+              </button>
+              <button
+                className="ml-4 mt-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+                onClick={shareLink}
+              >
+                友達にシェアする
+              </button>
+            </div>
           </Modal>
         </div>
       </div>

@@ -54,14 +54,14 @@ const Header: React.FC = () => {
       <div css={css(classes.root)}>
         <AppBar css={css(classes.appbar)} position="static" color="primary">
           <Toolbar>
-            <IconButton
+            {/* <IconButton
               edge="start"
               css={css(classes.menuButton)}
               style={{ color: "#f8faf7" }}
               aria-label="menu"
             >
               <MenuIcon />
-            </IconButton>
+            </IconButton> */}
             <Typography
               variant="h6"
               css={css(classes.title)}
