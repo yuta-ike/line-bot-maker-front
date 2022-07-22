@@ -7,7 +7,7 @@ type Props = {
 
 const TextOutputNode: React.FC<Props> = (props) => {
   const { node } = props
-  const [inputedText, setInputedText] = useState("")
+  const [inputedText, setInputedText] = useState(node.createrInputValue)
   useEffect(() => {
     const updateUserInputValue = () => {
       node.createrInputValue = inputedText

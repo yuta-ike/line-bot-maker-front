@@ -81,15 +81,17 @@ export class GraphNodeClass {
       outPoints,
       createrInputValue,
       isInitialNode = false,
+      id,
     }: {
       pos?: Coordinate //44l、三項演算子、値が入っていないとFalse判定で宣言
       inPoints?: Point[] //38l
       outPoints?: Point[]
       createrInputValue?: string
       isInitialNode?: boolean
+      id?: string
     } = {},
   ) {
-    this.id = `${GraphNodeClass.id++}` //idはGlaphNodeClassが呼び出される度に自動でインクリメント
+    this.id = id ?? `${GraphNodeClass.id++}` //idはGlaphNodeClassが呼び出される度に自動でインクリメント
     this.node = node
     this.pos = pos ?? { x: 0, y: 0 } //null合体代入、posがnullなら初期座標として(0,0)を代入
     this.inPoints = inPoints ?? []

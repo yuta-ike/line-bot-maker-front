@@ -36,92 +36,15 @@ import TopBar from "../../components/TopBar"
 import BottomBar from "../../components/BottomBar"
 import axios from "axios"
 import { useRouter } from "next/router"
+import { useLiff, useUser } from "../../provider/LiffProvider"
+import { FlowChart } from "../../interpreter/type"
+import buildInviteMessage from "../../components/utils/flexMessage"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
-
-//nodeのサイズ
-//使われていない
-// const NODE_WIDTH = 160
-// const NODE_HEIGHT = 80
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
 const INIT_NODES = [
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 01",
-  //     color: "#fda4aeed",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 50,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [
-  //       { type: "number", label: "yes", limit: null },
-  //       { type: "number", label: "no", limit: null },
-  //     ],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 02",
-  //     color: "#14b8a5ed",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 150,
-  //     },
-  //     inPoints: [{ type: "number", label: "input", limit: null }],
-  //     outPoints: [
-  //       { type: "number", label: "yes", limit: null },
-  //       { type: "number", label: "no", limit: null },
-  //     ],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 03",
-  //     color: "#fb923ced",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 250,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [{ type: "number", label: "no", limit: null }],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 04",
-  //     color: "#fb923ced",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 350,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [{ type: "number", label: "no", limit: null }],
-  //   },
-  // ),
   new GraphNodeClass(
     {
       label: "テキスト入力",
@@ -131,11 +54,9 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 50,
+        y: 100,
       },
-      inPoints: [
-        // { type: "number", label: "input", limit: null }
-      ],
+      inPoints: [],
       outPoints: [{ type: "number", label: "confirmed", limit: null }],
       isInitialNode: true,
     },
@@ -149,7 +70,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 150,
+        y: 225,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -168,7 +89,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 250,
+        y: 350,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -187,13 +108,10 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 350,
+        y: 475,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
-      outPoints: [
-        // { type: "number", label: "yes", limit: null },
-        // { type: "number", label: "no", limit: null },
-      ],
+      outPoints: [],
       isInitialNode: true,
     },
   ),
@@ -206,7 +124,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 450,
+        y: 600,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -244,11 +162,12 @@ const checkNodeType = (node: GraphNodeClass) => {
 const ComponentsSideList: React.FC = () => {
   const router = useRouter()
   const botId = router.query.botId as string
+  const user = useUser()
+  const liff = useLiff()
 
   const [name, setName] = useState("")
   //nodeとedgeの状態管理
   const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
-  // const [createdNodes, setCreatedNodes] = useState<GraphNodeClass[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
 
   const [focusItemId, setFocusItemId] = useState<
@@ -271,10 +190,43 @@ const ComponentsSideList: React.FC = () => {
   })
 
   useEffect(() => {
+    if (botId == null) {
+      return
+    }
     ;(async () => {
       const res = await axios.get(`${API_BASE_URL}/getIdToken/bot/${botId}`)
-      const flowChart = JSON.parse(res.data.flowChart)
-      // TODO: フローチャートの反映
+      const flowChart: FlowChart = JSON.parse(res.data.flowChart)
+      setNodes((prev) => [
+        ...prev,
+        ...flowChart.map(
+          ({ node }) =>
+            new GraphNodeClass(node.node, {
+              id: `SAVED_${node.id}`,
+              pos: node.pos,
+              inPoints: node.inPoints,
+              outPoints: node.outPoints,
+              createrInputValue: node.createrInputValue,
+              isInitialNode: false,
+            }),
+        ),
+      ])
+      setEdges((prev) => [
+        ...prev,
+        ...flowChart
+          .map(({ node, outputs }) =>
+            outputs.map((outNodeId, i) => ({
+              start: {
+                nodeId: `SAVED_${node.id}`,
+                pointId: i,
+              },
+              end: {
+                nodeId: `SAVED_${outNodeId}`,
+                pointId: 0,
+              },
+            })),
+          )
+          .flat(1),
+      ])
       setName(res.data.name)
     })()
   }, [botId])
@@ -379,8 +331,6 @@ const ComponentsSideList: React.FC = () => {
   //カーソルのpositionをチェック
   const cursorPos = useCursorPos(tmpEdgeStartNodeId != null)
 
-  const rootId = useId()
-
   const [testcase, setTestcase] = useState("Hello")
 
   const result = useMemo(() => {
@@ -428,6 +378,10 @@ const ComponentsSideList: React.FC = () => {
   }, [edges, nodes, testcase])
 
   const handleSave = async () => {
+    if (user == null) {
+      window.alert("保存に失敗しました")
+      return
+    }
     const flowchart = nodes
       .filter(({ isInitialNode }) => !isInitialNode)
       .map((node) => {
@@ -443,7 +397,7 @@ const ComponentsSideList: React.FC = () => {
               | "correspondCheckNode"
               | "textOutputNode"
               | "nop",
-            userInputValue: node.createrInputValue,
+            createrInputValue: node.createrInputValue,
           },
           outputs: relatedEdges.map(({ end }) => end.nodeId),
         }
@@ -452,9 +406,22 @@ const ComponentsSideList: React.FC = () => {
     await axios.put(`${API_BASE_URL}/getIdToken/bot/${botId}`, {
       name,
       flowChart: JSON.stringify(flowchart),
-      developperId: "",
+      developperId: user.id,
     })
   }
+
+  const handleShare = useCallback(async () => {
+    await liff!.shareTargetPicker([
+      // @ts-ignore
+      buildInviteMessage({
+        name,
+        botId,
+        createdAt: new Date().toISOString().slice(0, 10),
+      }),
+    ])
+  }, [botId, liff, name])
+
+  const rootId = useId()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -794,7 +761,7 @@ const ComponentsSideList: React.FC = () => {
         </div>
       </main>
       <footer>
-        <BottomBar onSave={handleSave} />
+        <BottomBar onSave={handleSave} onShare={handleShare} />
       </footer>
     </div>
   )
