@@ -30,6 +30,9 @@ import { useRouter } from "next/router"
 import { useLiff, useUser } from "../../provider/LiffProvider"
 import { FlowChart } from "../../interpreter/type"
 import buildInviteMessage from "../../components/utils/flexMessage"
+import NotificationSnackBar, {
+  useSnackBar,
+} from "../../components/NotificationSnackBar"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
@@ -149,6 +152,7 @@ const ComponentsSideList: React.FC = () => {
   const botId = router.query.botId as string
   const user = useUser()
   const liff = useLiff()
+  const showSnackBar = useSnackBar()
 
   const [name, setName] = useState("")
   //nodeとedgeの状態管理
@@ -392,20 +396,25 @@ const ComponentsSideList: React.FC = () => {
     }
 
     // NOTE: API呼び出し: PUT /bot/:botid
+    showSnackBar("ok", "保存しました!!")
   }
 
   /**
    * フローチャートのLINE共有処理
    */
   const handleShare = useCallback(async () => {
-    await liff!.shareTargetPicker([
-      buildInviteMessage({
-        name,
-        botId,
-        createdAt: new Date().toISOString().slice(0, 10),
-      }),
-    ])
-  }, [botId, liff, name])
+    try {
+      await liff!.shareTargetPicker([
+        buildInviteMessage({
+          name,
+          botId,
+          createdAt: new Date().toISOString().slice(0, 10),
+        }),
+      ])
+    } catch {
+      showSnackBar("error", "共有に失敗しました")
+    }
+  }, [botId, liff, name, showSnackBar])
 
   /**
    * フローチャートの削除処理
@@ -418,9 +427,9 @@ const ComponentsSideList: React.FC = () => {
         router.push("/")
       }
     } catch {
-      window.alert("削除に失敗しました")
+      showSnackBar("error", "削除に失敗しました")
     }
-  }, [router])
+  }, [router, showSnackBar])
 
   const rootId = useId()
 

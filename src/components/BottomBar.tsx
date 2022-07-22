@@ -1,5 +1,6 @@
 import { useState } from "react"
 import Modal from "react-modal"
+import { useSnackBar } from "./NotificationSnackBar"
 
 export type BottomBarProps = {
   onSave: () => Promise<void> | void
@@ -14,6 +15,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
   onDelete,
   onReset,
 }) => {
+  const showSnackBar = useSnackBar()
   const [modalIsOpen, setIsOpen] = useState(false)
 
   // モーダルを開く処理
@@ -36,7 +38,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
     try {
       await onShare()
     } catch {
-      window.alert("エラーが発生しました")
+      showSnackBar("error", "エラーが発生しました")
     } finally {
       setIsOpen(false)
     }
@@ -44,7 +46,6 @@ const BottomBar: React.FC<BottomBarProps> = ({
 
   const handleSave = async () => {
     await onSave()
-    window.alert("保存しました")
   }
 
   const handleDelete = async () => {
@@ -57,6 +58,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
       return
     }
     onReset()
+    showSnackBar("ok", "リセットしました")
   }
 
   // モーダルを画面中央に表示する用のスタイル
