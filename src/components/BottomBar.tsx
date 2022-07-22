@@ -4,9 +4,10 @@ import Modal from "react-modal"
 export type BottomBarProps = {
   onSave: () => Promise<void> | void
   onShare: () => Promise<void> | void
+  onDelete: () => Promise<void> | void
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare }) => {
+const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
   const [modalIsOpen, setIsOpen] = useState(false)
 
   // モーダルを開く処理
@@ -40,6 +41,10 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare }) => {
     window.alert("保存しました")
   }
 
+  const handleDelete = async () => {
+    await onDelete()
+  }
+
   // モーダルを画面中央に表示する用のスタイル
   const customStyles = {
     content: {
@@ -57,7 +62,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare }) => {
       <div className="fixed inset-x-0 bottom-0 flex justify-between">
         <button
           className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-          onClick={() => window.alert("未実装です")}
+          onClick={handleDelete}
         >
           削除
         </button>

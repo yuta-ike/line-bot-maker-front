@@ -28,7 +28,6 @@ import CorrespondCheckNode from "../../components/nodetypes/CorrespondCheckNode"
 import IncludeCheckNode from "../../components/nodetypes/IncludeCheckNode"
 import WeatherCheckNode from "../../components/nodetypes/WeatherCheckNode"
 import { FiCopy, FiTrash2 } from "react-icons/fi"
-import TestCaseComponent from "../../components/TestCaseComponent"
 import execFlowChart from "../../interpreter"
 import { FiAlertCircle } from "react-icons/fi"
 import { InterpreterError } from "../../interpreter/error"
@@ -420,6 +419,18 @@ const ComponentsSideList: React.FC = () => {
     ])
   }, [botId, liff, name])
 
+  const handleDeleteBot = useCallback(async () => {
+    try {
+      const res = window.confirm("本当に削除しますか？")
+      if (res) {
+        await axios.delete(`${API_BASE_URL}/getIdToken/bot/${botId}`)
+        router.push("/")
+      }
+    } catch {
+      window.alert("削除に失敗しました")
+    }
+  }, [botId, router])
+
   const rootId = useId()
 
   return (
@@ -760,7 +771,11 @@ const ComponentsSideList: React.FC = () => {
         </div>
       </main>
       <footer>
-        <BottomBar onSave={handleSave} onShare={handleShare} />
+        <BottomBar
+          onSave={handleSave}
+          onShare={handleShare}
+          onDelete={handleDeleteBot}
+        />
       </footer>
     </div>
   )
