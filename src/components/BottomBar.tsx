@@ -7,6 +7,7 @@ export type BottomBarProps = {
   onShare: () => Promise<void> | void
   onDelete: () => Promise<void> | void
   onReset: () => void
+  onCopyUrl: () => Promise<void> | void
 }
 
 const BottomBar: React.FC<BottomBarProps> = ({
@@ -14,6 +15,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
   onShare,
   onDelete,
   onReset,
+  onCopyUrl,
 }) => {
   const showSnackBar = useSnackBar()
   const [modalIsOpen, setIsOpen] = useState(false)
@@ -46,6 +48,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
 
   const handleSave = async () => {
     await onSave()
+    showSnackBar("ok", "保存しました!!")
   }
 
   const handleDelete = async () => {
@@ -71,6 +74,12 @@ const BottomBar: React.FC<BottomBarProps> = ({
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
     },
+  }
+
+  const handleCopyUrl = async () => {
+    await onCopyUrl()
+    setIsOpen(false)
+    showSnackBar("ok", "URLをクリップボードにコピーしました")
   }
 
   return (
@@ -113,14 +122,20 @@ const BottomBar: React.FC<BottomBarProps> = ({
             onRequestClose={closeModal}
           >
             <h1>Botを保存しました！！</h1>
-            <button
-              className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            {/* <button
+              className="mr-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
               onClick={closeModal}
             >
-              close
+              とじる
+            </button> */}
+            <button
+              className="ml-4 mt-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+              onClick={handleCopyUrl}
+            >
+              共有URLをコピー
             </button>
             <button
-              className="m-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+              className="ml-4 mt-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
               onClick={shareLink}
             >
               友達にシェアする

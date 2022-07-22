@@ -35,6 +35,7 @@ import NotificationSnackBar, {
 } from "../../components/NotificationSnackBar"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
@@ -396,7 +397,6 @@ const ComponentsSideList: React.FC = () => {
     }
 
     // NOTE: API呼び出し: PUT /bot/:botid
-    showSnackBar("ok", "保存しました!!")
   }
 
   /**
@@ -430,6 +430,10 @@ const ComponentsSideList: React.FC = () => {
       showSnackBar("error", "削除に失敗しました")
     }
   }, [router, showSnackBar])
+
+  const handleCopyUrl = useCallback(async () => {
+    await navigator.clipboard.writeText(`${APP_URL}/activate?botId=${botId}`)
+  }, [botId])
 
   const rootId = useId()
 
@@ -766,6 +770,7 @@ const ComponentsSideList: React.FC = () => {
           onShare={handleShare}
           onDelete={handleDeleteBot}
           onReset={handleReset}
+          onCopyUrl={handleCopyUrl}
         />
       </footer>
     </div>
