@@ -28,22 +28,22 @@ const FileComponent: React.FC = () => {
   )
 }
 
-type TodoItem = {
-  id: number
-  content: string
-}
-
 const Home: NextPage = () => {
   const router = useRouter()
+  const user = useUser()
+
   const handleCreate = useCallback(async () => {
+    if (user == null) {
+      return
+    }
     const res = await axios.post(`${API_BASE_URL}/getIdToken/bot`, {
       bot_id: genId(),
       name: "新しいプログラム",
       flowChart: "[]",
-      developerId: "001",
+      developerId: user.id,
     })
     router.push(`/bot/${res.data.bot_id}`)
-  }, [router])
+  }, [router, user])
 
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
