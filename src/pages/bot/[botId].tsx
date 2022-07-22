@@ -35,7 +35,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
-const INIT_NODES = [
+const genInitNodes = () => [
   new GraphNodeClass(
     {
       label: "テキスト入力",
@@ -128,12 +128,6 @@ const INIT_NODES = [
   ),
 ]
 
-//初期位置のnodeの位置のリスト()
-//ComponentsSideListの中でなく，ここで書いているのはnodesに新たなnodeが加わると，INIT_NODES自身も新たなnodeが加わった配列になるから（驚き）
-const fixedInitNodePosList: Coordinate[] = INIT_NODES.map(
-  (node: GraphNodeClass) => node.pos,
-)
-
 const checkNodeType = (node: GraphNodeClass) => {
   if (node.node.nodeType == "textInputNode") {
     return <TextInputNode />
@@ -158,7 +152,7 @@ const ComponentsSideList: React.FC = () => {
 
   const [name, setName] = useState("")
   //nodeとedgeの状態管理
-  const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
+  const [nodes, setNodes] = useState<GraphNodeClass[]>(() => genInitNodes())
   const [edges, setEdges] = useState<Edge[]>([])
   const [testcase, setTestcase] = useState("Hello")
 
@@ -176,10 +170,7 @@ const ComponentsSideList: React.FC = () => {
         }
       }
     | null
-  >({
-    type: "node",
-    nodeId: INIT_NODES[0].id,
-  })
+  >(null)
 
   /**
    * データベースから初期位置となるフローチャートを取得
@@ -232,7 +223,7 @@ const ComponentsSideList: React.FC = () => {
   //初期のnodeがドラッグされると初期位置に新たなnodeを追加する
   //ドラッグされたnodeを受け取り，それが初期位置にあったnodeなら初期位置に同じnodeを追加
   const regenerateNode = (node: GraphNodeClass) => {
-    if (fixedInitNodePosList.includes(node.pos)) {
+    if (node.isInitialNode) {
       nodes.push(
         //ここでダイレクトにnodeを追加すると同じnodeオブジェクトをnodeをnodesに追加することになるので，もとのnodeと同じ情報をもつnodeを新たに生成する（idは異なる）
         new GraphNodeClass(
@@ -308,6 +299,11 @@ const ComponentsSideList: React.FC = () => {
       y: node.pos.y,
     }
     setNodes((nodes) => [...nodes, node.duplicate(duplicatedNodePos)])
+  }, [])
+
+  const handleReset = useCallback(() => {
+    setNodes(genInitNodes())
+    setEdges([])
   }, [])
 
   //カーソルのpositionをチェック
@@ -760,6 +756,7 @@ const ComponentsSideList: React.FC = () => {
           onSave={handleSave}
           onShare={handleShare}
           onDelete={handleDeleteBot}
+          onReset={handleReset}
         />
       </footer>
     </div>
