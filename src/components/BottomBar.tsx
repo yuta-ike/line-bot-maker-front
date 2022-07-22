@@ -1,21 +1,25 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Image from "next/image"
 import Modal from "react-modal"
 import { useSnackBar } from "./NotificationSnackBar"
+import generateQR from "./utils/genQR"
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string
 
 export type BottomBarProps = {
+  botId: string
   onSave: () => Promise<void> | void
   onShare: () => Promise<void> | void
   onDelete: () => Promise<void> | void
   onReset: () => void
-  onCopyUrl: () => Promise<void> | void
 }
 
 const BottomBar: React.FC<BottomBarProps> = ({
+  botId,
   onSave,
   onShare,
   onDelete,
   onReset,
-  onCopyUrl,
 }) => {
   const showSnackBar = useSnackBar()
   const [modalIsOpen, setIsOpen] = useState(false)
@@ -76,11 +80,19 @@ const BottomBar: React.FC<BottomBarProps> = ({
     },
   }
 
+  const shareUrl = `${APP_URL}/activate?botId=${botId}`
+
   const handleCopyUrl = async () => {
-    await onCopyUrl()
+    await navigator.clipboard.writeText(shareUrl)
     setIsOpen(false)
     showSnackBar("ok", "URLをクリップボードにコピーしました")
   }
+
+  const [qrImage, setQrImage] = useState("")
+
+  useEffect(() => {
+    generateQR(shareUrl).then(setQrImage)
+  }, [shareUrl])
 
   return (
     <>
@@ -128,18 +140,29 @@ const BottomBar: React.FC<BottomBarProps> = ({
             >
               とじる
             </button> */}
-            <button
-              className="ml-4 mt-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-              onClick={handleCopyUrl}
-            >
-              共有URLをコピー
-            </button>
-            <button
-              className="ml-4 mt-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
-              onClick={shareLink}
-            >
-              友達にシェアする
-            </button>
+            <div className="flex w-full justify-center py-4">
+              <Image
+                src={qrImage}
+                alt=""
+                width="120px"
+                height="120px"
+                className="mx-auto"
+              />
+            </div>
+            <div>
+              <button
+                className="ml-4 mt-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+                onClick={handleCopyUrl}
+              >
+                共有URLをコピー
+              </button>
+              <button
+                className="ml-4 mt-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+                onClick={shareLink}
+              >
+                友達にシェアする
+              </button>
+            </div>
           </Modal>
         </div>
       </div>
