@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { BsPencilSquare } from "react-icons/bs"
 
-const TopBar = () => {
+const TopBar: React.FC = () => {
   const [pjName, setPJName] = useState("")
 
   return (

@@ -1,8 +1,5 @@
 import type { NextPage } from "next"
 import { BsFillFileCodeFill } from "react-icons/bs"
-import Head from "next/head"
-import Image from "next/image"
-import styles from "../styles/Home.module.css"
 import Header from "../modules/Header"
 import { useUser, useLiffOperation } from "../provider/LiffProvider"
 
@@ -30,26 +27,10 @@ type TodoItem = {
 }
 
 const Home: NextPage = () => {
-  const { login, logout } = useLiffOperation()
-  const user = useUser()
-
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
       <Header />
-      {user == null ? (
-        <button onClick={login}>ログイン</button>
-      ) : (
-        <button onClick={logout}>ログアウト</button>
-      )}
-
-      <div>
-        {user?.id}
-        <br />
-        {user?.name}
-        <br />
-        <img src={user?.iconUrl ?? ""} alt="" width="60px" />
-      </div>
-      <form action="http://localhost:3000" method="get">
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="flex flex-col items-center">
           <div className="flex flex-row">
             <input
