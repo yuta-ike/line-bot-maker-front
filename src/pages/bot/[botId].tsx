@@ -34,6 +34,10 @@ import { FiAlertCircle } from "react-icons/fi"
 import { InterpreterError } from "../../interpreter/error"
 import TopBar from "../../components/TopBar"
 import BottomBar from "../../components/BottomBar"
+import axios from "axios"
+import { useRouter } from "next/router"
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 //nodeのサイズ
 //使われていない
@@ -238,6 +242,10 @@ const checkNodeType = (node: GraphNodeClass) => {
 }
 
 const ComponentsSideList: React.FC = () => {
+  const router = useRouter()
+  const botId = router.query.botId as string
+
+  const [name, setName] = useState("")
   //nodeとedgeの状態管理
   const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
   // const [createdNodes, setCreatedNodes] = useState<GraphNodeClass[]>([])
@@ -261,6 +269,15 @@ const ComponentsSideList: React.FC = () => {
     type: "node",
     nodeId: INIT_NODES[0].id,
   })
+
+  useEffect(() => {
+    ;(async () => {
+      const res = await axios.get(`${API_BASE_URL}/getIdToken/bot/${botId}`)
+      const flowChart = JSON.parse(res.data.flowChart)
+      // TODO: フローチャートの反映
+      setName(res.data.name)
+    })()
+  }, [botId])
 
   //初期のnodeがドラッグされると初期位置に新たなnodeを追加する
   //ドラッグされたnodeを受け取り，それが初期位置にあったnodeなら初期位置に同じnodeを追加
@@ -411,13 +428,38 @@ const ComponentsSideList: React.FC = () => {
   }, [edges, nodes, testcase])
 
   const handleSave = async () => {
-    // TODO: 保存処理
+    const flowchart = nodes
+      .filter(({ isInitialNode }) => !isInitialNode)
+      .map((node) => {
+        const relatedEdges = edges.filter(
+          ({ start }) => start.nodeId === node.id,
+        )
+        return {
+          id: node.id,
+          node: {
+            ...node,
+            type: node.node.nodeType as
+              | "textInputNode"
+              | "correspondCheckNode"
+              | "textOutputNode"
+              | "nop",
+            userInputValue: node.createrInputValue,
+          },
+          outputs: relatedEdges.map(({ end }) => end.nodeId),
+        }
+      })
+
+    await axios.put(`${API_BASE_URL}/getIdToken/bot/${botId}`, {
+      name,
+      flowChart: JSON.stringify(flowchart),
+      developperId: "",
+    })
   }
 
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-grow">
-        <TopBar />
+        <TopBar name={name} onChangeName={setName} />
         <div id="concept">
           {/* 枠線の指定 */}
           <div className="flex">

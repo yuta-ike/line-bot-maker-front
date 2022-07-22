@@ -1,7 +1,14 @@
+import axios from "axios"
 import type { NextPage } from "next"
+import { useCallback } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
 import Header from "../modules/Header"
 import { useUser, useLiffOperation } from "../provider/LiffProvider"
+import { nanoid } from "nanoid"
+import genId from "../components/utils/genId"
+import { useRouter } from "next/router"
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 const FileComponent: React.FC = () => {
   return (
@@ -27,9 +34,28 @@ type TodoItem = {
 }
 
 const Home: NextPage = () => {
+  const router = useRouter()
+  const handleCreate = useCallback(async () => {
+    const res = await axios.post(`${API_BASE_URL}/getIdToken/bot`, {
+      bot_id: genId(),
+      name: "新しいプログラム",
+      flowChart: "[]",
+      developerId: "001",
+    })
+    router.push(`/bot/${res.data.bot_id}`)
+  }, [router])
+
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
       <Header />
+      <div className="flex w-full justify-end">
+        <button
+          onClick={handleCreate}
+          className="rounded bg-green-500 p-4 text-white hover:bg-green-600"
+        >
+          新しいBotを作る
+        </button>
+      </div>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="flex flex-col items-center">
           <div className="flex flex-row">
