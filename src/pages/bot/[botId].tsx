@@ -1,12 +1,5 @@
 import classNames from "classnames"
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useState,
-} from "react"
+import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import Draggable from "react-draggable"
 import {
   calcEdgeId,
@@ -168,6 +161,7 @@ const ComponentsSideList: React.FC = () => {
   //nodeとedgeの状態管理
   const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
   const [edges, setEdges] = useState<Edge[]>([])
+  const [testcase, setTestcase] = useState("Hello")
 
   const [focusItemId, setFocusItemId] = useState<
     | { type: "node"; nodeId: string }
@@ -188,6 +182,9 @@ const ComponentsSideList: React.FC = () => {
     nodeId: INIT_NODES[0].id,
   })
 
+  /**
+   * データベースから初期位置となるフローチャートを取得
+   */
   useEffect(() => {
     if (botId == null) {
       return
@@ -250,22 +247,6 @@ const ComponentsSideList: React.FC = () => {
           },
         ),
       )
-      // createdNodes.push(
-      //   //ここでダイレクトにnodeを追加すると同じnodeオブジェクトをnodeをnodesに追加することになるので，もとのnodeと同じ情報をもつnodeを新たに生成する（idは異なる）
-      //   new GraphNodeClass(
-      //     {
-      //       label: node.node.label,
-      //       color: node.node.color,
-      //       nodeType: node.node.nodeType,
-      //     },
-      //     {
-      //       pos: node.pos,
-      //       inPoints: node.inPoints,
-      //       outPoints: node.outPoints,
-      //       isInitialNode: true,
-      //     },
-      //   ),
-      // )
     }
   }
 
@@ -330,8 +311,9 @@ const ComponentsSideList: React.FC = () => {
   //カーソルのpositionをチェック
   const cursorPos = useCursorPos(tmpEdgeStartNodeId != null)
 
-  const [testcase, setTestcase] = useState("Hello")
-
+  /**
+   * フローチャートのリアルタイム実行
+   */
   const result = useMemo(() => {
     try {
       const result = execFlowChart(
@@ -376,6 +358,9 @@ const ComponentsSideList: React.FC = () => {
     }
   }, [edges, nodes, testcase])
 
+  /**
+   * フローチャートの保存処理
+   */
   const handleSave = async () => {
     if (user == null) {
       window.alert("保存に失敗しました")
@@ -409,6 +394,9 @@ const ComponentsSideList: React.FC = () => {
     })
   }
 
+  /**
+   * フローチャートのLINE共有処理
+   */
   const handleShare = useCallback(async () => {
     await liff!.shareTargetPicker([
       buildInviteMessage({
@@ -419,6 +407,9 @@ const ComponentsSideList: React.FC = () => {
     ])
   }, [botId, liff, name])
 
+  /**
+   * フローチャートの削除処理
+   */
   const handleDeleteBot = useCallback(async () => {
     try {
       const res = window.confirm("本当に削除しますか？")
@@ -662,13 +653,7 @@ const ComponentsSideList: React.FC = () => {
                           })
                         }
                       >
-                        {/* nodeの名前 */}
-                        {/* {node.node.label} */}
                         {checkNodeType(node)}
-                        {/* ここに機能を追加する */}
-                        {/* inPointsの描画 */}
-                        {/* <> */}
-                        {/* {checkNodeType(node.node.nodeType)} */}
                         {/* 位置 */}
                         <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
                           {/* 機能 */}
@@ -757,16 +742,12 @@ const ComponentsSideList: React.FC = () => {
                             </button>
                           ))}
                         </div>
-                        {/* </> */}
                       </div>
-                      {/* {checkNodeType(node.node.nodeType)} */}
-                      {/* </> */}
                     </div>
                   </Draggable>
                 )
               })}
             </div>
-            {/* <TestCaseComponent nodes={createdNodes}></TestCaseComponent> */}
           </div>
         </div>
       </main>

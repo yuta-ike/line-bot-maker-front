@@ -1,6 +1,6 @@
 import axios from "axios"
 import type { NextPage } from "next"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
 import Header from "../modules/Header"
 import { useUser, useLiffOperation } from "../provider/LiffProvider"
@@ -32,18 +32,29 @@ const Home: NextPage = () => {
   const router = useRouter()
   const user = useUser()
 
+  const [searchInput, setSearchInput] = useState("")
+
+  /**
+   * 新しいBotの作成
+   */
   const handleCreate = useCallback(async () => {
     if (user == null) {
       return
     }
-    const res = await axios.post(`${API_BASE_URL}/getIdToken/bot`, {
-      bot_id: genId(),
-      name: "新しいプログラム",
-      flowChart: "[]",
-      developerId: user.id,
-    })
-    router.push(`/bot/${res.data.bot_id}`)
+    try {
+      const res = await axios.post(`${API_BASE_URL}/getIdToken/bot`, {
+        bot_id: genId(),
+        name: "新しいプログラム",
+        flowChart: "[]",
+        developerId: user.id,
+      })
+      router.push(`/bot/${res.data.bot_id}`)
+    } catch {
+      window.alert("エラーが発生しました")
+    }
   }, [router, user])
+
+  // NOTE: API呼び出し: GET /bot
 
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
@@ -64,14 +75,11 @@ const Home: NextPage = () => {
               type="text"
               name="search"
               placeholder="キーワードを入力"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
             <div className="w-4" />
-            <input
-              className="container w-12 border border-black"
-              type="submit"
-              name="submit"
-              value="検索"
-            />
+            <button className="container w-12 border border-black">検索</button>
           </div>
         </div>
       </form>
