@@ -1,5 +1,3 @@
-import { BsPencilSquare } from "react-icons/bs"
-
 export type TopBarProps = {
   name: string
   onChangeName: (name: string) => void
@@ -8,7 +6,7 @@ export type TopBarProps = {
 const TopBar: React.FC<TopBarProps> = ({ name, onChangeName }) => {
   return (
     <>
-      <div className="flex items-center bg-red-300 p-2 pl-4">
+      <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
         <div>PJ名：</div>
         <input
           className="rounded px-2 py-1"
@@ -18,9 +16,6 @@ const TopBar: React.FC<TopBarProps> = ({ name, onChangeName }) => {
             onChangeName(e.target.value)
           }}
         />
-        <div className="bg-w p-2">
-          <BsPencilSquare />
-        </div>
       </div>
     </>
   )
