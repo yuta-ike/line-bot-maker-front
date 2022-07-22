@@ -1,7 +1,12 @@
 import type { NextPage } from "next"
+import { useCallback, useState } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
 import Header from "../modules/Header"
-import { useUser, useLiffOperation } from "../provider/LiffProvider"
+import { useUser } from "../provider/LiffProvider"
+import genId from "../components/utils/genId"
+import { useRouter } from "next/router"
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 const FileComponent: React.FC = () => {
   return (
@@ -21,15 +26,46 @@ const FileComponent: React.FC = () => {
   )
 }
 
-type TodoItem = {
-  id: number
-  content: string
-}
-
 const Home: NextPage = () => {
+  const router = useRouter()
+  const user = useUser()
+
+  const [searchInput, setSearchInput] = useState("")
+
+  /**
+   * 新しいBotの作成
+   */
+  const handleCreate = useCallback(async () => {
+    if (user == null) {
+      return
+    }
+    try {
+      const payload = {
+        bot_id: genId(),
+        name: "新しいプログラム",
+        flowChart: "[]",
+        developerId: user.id,
+      }
+      // NOTE: API呼び出し: POST /bot/:botid
+      router.push(`/bot/${payload.bot_id}`)
+    } catch {
+      window.alert("エラーが発生しました")
+    }
+  }, [router, user])
+
+  // NOTE: API呼び出し: GET /bot (SWR or useEffect)
+
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
       <Header />
+      <div className="flex w-full justify-end">
+        <button
+          onClick={handleCreate}
+          className="rounded bg-green-500 p-4 text-white hover:bg-green-600"
+        >
+          新しいBotを作る
+        </button>
+      </div>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="flex flex-col items-center">
           <div className="flex flex-row">
@@ -38,14 +74,11 @@ const Home: NextPage = () => {
               type="text"
               name="search"
               placeholder="キーワードを入力"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
             <div className="w-4" />
-            <input
-              className="container w-12 border border-black"
-              type="submit"
-              name="submit"
-              value="検索"
-            />
+            <button className="container w-12 border border-black">検索</button>
           </div>
         </div>
       </form>

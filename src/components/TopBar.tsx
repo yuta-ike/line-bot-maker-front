@@ -1,24 +1,21 @@
-import { useState } from "react"
-import { BsPencilSquare } from "react-icons/bs"
+export type TopBarProps = {
+  name: string
+  onChangeName: (name: string) => void
+}
 
-const TopBar: React.FC = () => {
-  const [pjName, setPJName] = useState("")
-
+const TopBar: React.FC<TopBarProps> = ({ name, onChangeName }) => {
   return (
     <>
-      <div className="flex items-center bg-red-300 p-2 pl-4">
+      <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
         <div>PJ名：</div>
-        <textarea
-          className="rounded"
-          rows={1}
-          value={pjName}
+        <input
+          className="rounded px-2 py-1"
+          placeholder="プロジェクト名"
+          value={name}
           onChange={(e) => {
-            setPJName(e.target.value)
+            onChangeName(e.target.value)
           }}
-        ></textarea>
-        <div className="bg-w p-2">
-          <BsPencilSquare />
-        </div>
+        />
       </div>
     </>
   )

@@ -1,19 +1,18 @@
 import { useState } from "react"
 import Modal from "react-modal"
-import { useLiff } from "../provider/LiffProvider"
 
 export type BottomBarProps = {
   onSave: () => Promise<void> | void
+  onShare: () => Promise<void> | void
+  onDelete: () => Promise<void> | void
 }
 
-const BottomBar: React.FC<BottomBarProps> = () => {
+const BottomBar: React.FC<BottomBarProps> = ({ onSave, onShare, onDelete }) => {
   const [modalIsOpen, setIsOpen] = useState(false)
-  //const  = useContext(LiffContext)
-  const liff = useLiff()
-  //const liff2 = useLiff
+
   // モーダルを開く処理
   const openModal = async () => {
-    await handleSave()
+    await onSave()
     setIsOpen(true)
   }
 
@@ -27,20 +26,25 @@ const BottomBar: React.FC<BottomBarProps> = () => {
   }
 
   // 友達にシェアする処理
-  const shareLink = () => {
-    liff!
-      .shareTargetPicker([
-        {
-          type: "text",
-          text: "this is a test",
-        },
-      ])
-      .then()
-      .catch(function (res) {
-        console.log(res)
-      })
-    setIsOpen(false)
+  const shareLink = async () => {
+    try {
+      await onShare()
+    } catch {
+      window.alert("エラーが発生しました")
+    } finally {
+      setIsOpen(false)
+    }
   }
+
+  const handleSave = async () => {
+    await onSave()
+    window.alert("保存しました")
+  }
+
+  const handleDelete = async () => {
+    await onDelete()
+  }
+
   // モーダルを画面中央に表示する用のスタイル
   const customStyles = {
     content: {
@@ -53,16 +57,14 @@ const BottomBar: React.FC<BottomBarProps> = () => {
     },
   }
 
-  const handleSave = async () => {}
-
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 flex justify-between">
         <button
           className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-          onClick={() => window.alert("未実装です")}
+          onClick={handleDelete}
         >
-          消去
+          削除
         </button>
         <div className="flex">
           <button
@@ -71,14 +73,6 @@ const BottomBar: React.FC<BottomBarProps> = () => {
           >
             保存
           </button>
-          {/* <div
-            className="m-4 h-12 w-20 rounded bg-red-300 p-4 text-center shadow-md"
-            onClick={() => {
-              modalIsOpen ? closeModal : openModal
-            }}
-          >
-            公開
-          </div> */}
           <button
             className="m-4 h-12 rounded bg-red-300 p-4 text-center leading-none shadow-md"
             onClick={openModal}
@@ -86,7 +80,6 @@ const BottomBar: React.FC<BottomBarProps> = () => {
             保存して公開
           </button>
           <Modal
-            //className={"flex bg-green-300"}
             style={customStyles}
             // isOpenがtrueならモダールが起動する
             isOpen={modalIsOpen}

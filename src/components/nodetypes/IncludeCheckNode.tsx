@@ -7,12 +7,9 @@ type Props = {
 
 const IncludeCheckNode: React.FC<Props> = (props) => {
   const { node } = props
-  const [inputedText, setInputedText] = useState("")
+  const [inputedText, setInputedText] = useState(node.createrInputValue)
   useEffect(() => {
-    const updateUserInputValue = () => {
-      node.createrInputValue = inputedText
-    }
-    updateUserInputValue()
+    node.createrInputValue = inputedText
   }, [inputedText, node])
 
   return (

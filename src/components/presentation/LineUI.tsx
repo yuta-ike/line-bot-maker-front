@@ -63,7 +63,7 @@ const LineUI: React.FC<LineUIProps> = ({
       </svg>
       <div
         className={classNames(
-          "absolute -translate-x-1/2 -translate-y-1/2",
+          "pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2",
           !isFocused && "invisible",
         )}
         style={{

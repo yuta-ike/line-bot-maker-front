@@ -1,12 +1,5 @@
 import classNames from "classnames"
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useState,
-} from "react"
+import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import Draggable from "react-draggable"
 import {
   calcEdgeId,
@@ -28,96 +21,21 @@ import CorrespondCheckNode from "../../components/nodetypes/CorrespondCheckNode"
 import IncludeCheckNode from "../../components/nodetypes/IncludeCheckNode"
 import WeatherCheckNode from "../../components/nodetypes/WeatherCheckNode"
 import { FiCopy, FiTrash2 } from "react-icons/fi"
-import TestCaseComponent from "../../components/TestCaseComponent"
 import execFlowChart from "../../interpreter"
 import { FiAlertCircle } from "react-icons/fi"
 import { InterpreterError } from "../../interpreter/error"
 import TopBar from "../../components/TopBar"
 import BottomBar from "../../components/BottomBar"
+import { useRouter } from "next/router"
+import { useLiff, useUser } from "../../provider/LiffProvider"
+import { FlowChart } from "../../interpreter/type"
+import buildInviteMessage from "../../components/utils/flexMessage"
 
-//nodeのサイズ
-//使われていない
-// const NODE_WIDTH = 160
-// const NODE_HEIGHT = 80
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
 const INIT_NODES = [
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 01",
-  //     color: "#fda4aeed",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 50,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [
-  //       { type: "number", label: "yes", limit: null },
-  //       { type: "number", label: "no", limit: null },
-  //     ],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 02",
-  //     color: "#14b8a5ed",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 150,
-  //     },
-  //     inPoints: [{ type: "number", label: "input", limit: null }],
-  //     outPoints: [
-  //       { type: "number", label: "yes", limit: null },
-  //       { type: "number", label: "no", limit: null },
-  //     ],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 03",
-  //     color: "#fb923ced",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 250,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [{ type: "number", label: "no", limit: null }],
-  //   },
-  // ),
-  // new GraphNodeClass(
-  //   {
-  //     label: "Node 04",
-  //     color: "#fb923ced",
-  //     nodeType: "",
-  //   },
-  //   {
-  //     pos: {
-  //       x: 50,
-  //       y: 350,
-  //     },
-  //     inPoints: [
-  //       { type: "number", label: "input", limit: null },
-  //       { type: "number", label: "input", limit: null },
-  //     ],
-  //     outPoints: [{ type: "number", label: "no", limit: null }],
-  //   },
-  // ),
   new GraphNodeClass(
     {
       label: "テキスト入力",
@@ -127,11 +45,9 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 50,
+        y: 100,
       },
-      inPoints: [
-        // { type: "number", label: "input", limit: null }
-      ],
+      inPoints: [],
       outPoints: [{ type: "number", label: "confirmed", limit: null }],
       isInitialNode: true,
     },
@@ -145,7 +61,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 150,
+        y: 225,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -164,7 +80,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 250,
+        y: 350,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -183,13 +99,10 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 350,
+        y: 475,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
-      outPoints: [
-        // { type: "number", label: "yes", limit: null },
-        // { type: "number", label: "no", limit: null },
-      ],
+      outPoints: [],
       isInitialNode: true,
     },
   ),
@@ -202,7 +115,7 @@ const INIT_NODES = [
     {
       pos: {
         x: 50,
-        y: 450,
+        y: 600,
       },
       inPoints: [{ type: "number", label: "input", limit: null }],
       outPoints: [
@@ -238,10 +151,16 @@ const checkNodeType = (node: GraphNodeClass) => {
 }
 
 const ComponentsSideList: React.FC = () => {
+  const router = useRouter()
+  const botId = router.query.botId as string
+  const user = useUser()
+  const liff = useLiff()
+
+  const [name, setName] = useState("")
   //nodeとedgeの状態管理
   const [nodes, setNodes] = useState<GraphNodeClass[]>(INIT_NODES)
-  // const [createdNodes, setCreatedNodes] = useState<GraphNodeClass[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
+  const [testcase, setTestcase] = useState("Hello")
 
   const [focusItemId, setFocusItemId] = useState<
     | { type: "node"; nodeId: string }
@@ -261,6 +180,54 @@ const ComponentsSideList: React.FC = () => {
     type: "node",
     nodeId: INIT_NODES[0].id,
   })
+
+  /**
+   * データベースから初期位置となるフローチャートを取得
+   */
+  useEffect(() => {
+    if (botId == null) {
+      return
+    }
+    ;(async () => {
+      // NOTE: API呼び出しがまだ未実装なためreturn
+      return
+
+      const res = null as any // NOTE: API呼び出し: GET /bot/:botid
+      const flowChart: FlowChart = JSON.parse(res.data.flowChart)
+      setNodes((prev) => [
+        ...prev,
+        ...flowChart.map(
+          ({ node }) =>
+            new GraphNodeClass(node.node, {
+              id: `SAVED_${node.id}`,
+              pos: node.pos,
+              inPoints: node.inPoints,
+              outPoints: node.outPoints,
+              createrInputValue: node.createrInputValue,
+              isInitialNode: false,
+            }),
+        ),
+      ])
+      setEdges((prev) => [
+        ...prev,
+        ...flowChart
+          .map(({ node, outputs }) =>
+            outputs.map((outNodeId, i) => ({
+              start: {
+                nodeId: `SAVED_${node.id}`,
+                pointId: i,
+              },
+              end: {
+                nodeId: `SAVED_${outNodeId}`,
+                pointId: 0,
+              },
+            })),
+          )
+          .flat(1),
+      ])
+      setName(res.data.name)
+    })()
+  }, [botId])
 
   //初期のnodeがドラッグされると初期位置に新たなnodeを追加する
   //ドラッグされたnodeを受け取り，それが初期位置にあったnodeなら初期位置に同じnodeを追加
@@ -282,22 +249,6 @@ const ComponentsSideList: React.FC = () => {
           },
         ),
       )
-      // createdNodes.push(
-      //   //ここでダイレクトにnodeを追加すると同じnodeオブジェクトをnodeをnodesに追加することになるので，もとのnodeと同じ情報をもつnodeを新たに生成する（idは異なる）
-      //   new GraphNodeClass(
-      //     {
-      //       label: node.node.label,
-      //       color: node.node.color,
-      //       nodeType: node.node.nodeType,
-      //     },
-      //     {
-      //       pos: node.pos,
-      //       inPoints: node.inPoints,
-      //       outPoints: node.outPoints,
-      //       isInitialNode: true,
-      //     },
-      //   ),
-      // )
     }
   }
 
@@ -362,10 +313,9 @@ const ComponentsSideList: React.FC = () => {
   //カーソルのpositionをチェック
   const cursorPos = useCursorPos(tmpEdgeStartNodeId != null)
 
-  const rootId = useId()
-
-  const [testcase, setTestcase] = useState("Hello")
-
+  /**
+   * フローチャートのリアルタイム実行
+   */
   const result = useMemo(() => {
     try {
       const result = execFlowChart(
@@ -410,14 +360,78 @@ const ComponentsSideList: React.FC = () => {
     }
   }, [edges, nodes, testcase])
 
+  /**
+   * フローチャートの保存処理
+   */
   const handleSave = async () => {
-    // TODO: 保存処理
+    if (user == null) {
+      window.alert("保存に失敗しました")
+      return
+    }
+    const flowchart = nodes
+      .filter(({ isInitialNode }) => !isInitialNode)
+      .map((node) => {
+        const relatedEdges = edges.filter(
+          ({ start }) => start.nodeId === node.id,
+        )
+        return {
+          id: node.id,
+          node: {
+            ...node,
+            type: node.node.nodeType as
+              | "textInputNode"
+              | "correspondCheckNode"
+              | "textOutputNode"
+              | "nop",
+            createrInputValue: node.createrInputValue,
+          },
+          outputs: relatedEdges.map(({ end }) => end.nodeId),
+        }
+      })
+
+    const payload = {
+      name,
+      flowChart: JSON.stringify(flowchart),
+      developperId: user.id,
+    }
+
+    // NOTE: API呼び出し: PUT /bot/:botid
   }
+
+  /**
+   * フローチャートのLINE共有処理
+   */
+  const handleShare = useCallback(async () => {
+    await liff!.shareTargetPicker([
+      buildInviteMessage({
+        name,
+        botId,
+        createdAt: new Date().toISOString().slice(0, 10),
+      }),
+    ])
+  }, [botId, liff, name])
+
+  /**
+   * フローチャートの削除処理
+   */
+  const handleDeleteBot = useCallback(async () => {
+    try {
+      const res = window.confirm("本当に削除しますか？")
+      if (res) {
+        // NOTE: API呼び出し: DELETE /bot/:botid
+        router.push("/")
+      }
+    } catch {
+      window.alert("削除に失敗しました")
+    }
+  }, [router])
+
+  const rootId = useId()
 
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-grow">
-        <TopBar />
+        <TopBar name={name} onChangeName={setName} />
         <div id="concept">
           {/* 枠線の指定 */}
           <div className="flex">
@@ -643,13 +657,7 @@ const ComponentsSideList: React.FC = () => {
                           })
                         }
                       >
-                        {/* nodeの名前 */}
-                        {/* {node.node.label} */}
                         {checkNodeType(node)}
-                        {/* ここに機能を追加する */}
-                        {/* inPointsの描画 */}
-                        {/* <> */}
-                        {/* {checkNodeType(node.node.nodeType)} */}
                         {/* 位置 */}
                         <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
                           {/* 機能 */}
@@ -738,21 +746,21 @@ const ComponentsSideList: React.FC = () => {
                             </button>
                           ))}
                         </div>
-                        {/* </> */}
                       </div>
-                      {/* {checkNodeType(node.node.nodeType)} */}
-                      {/* </> */}
                     </div>
                   </Draggable>
                 )
               })}
             </div>
-            {/* <TestCaseComponent nodes={createdNodes}></TestCaseComponent> */}
           </div>
         </div>
       </main>
       <footer>
-        <BottomBar onSave={handleSave} />
+        <BottomBar
+          onSave={handleSave}
+          onShare={handleShare}
+          onDelete={handleDeleteBot}
+        />
       </footer>
     </div>
   )
