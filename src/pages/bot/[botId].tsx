@@ -412,7 +412,6 @@ const ComponentsSideList: React.FC = () => {
 
   const handleShare = useCallback(async () => {
     await liff!.shareTargetPicker([
-      // @ts-ignore
       buildInviteMessage({
         name,
         botId,
