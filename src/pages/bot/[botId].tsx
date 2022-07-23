@@ -30,9 +30,8 @@ import { useRouter } from "next/router"
 import { useLiff, useUser } from "../../provider/LiffProvider"
 import { FlowChart } from "../../interpreter/type"
 import buildInviteMessage from "../../components/utils/flexMessage"
-import NotificationSnackBar, {
-  useSnackBar,
-} from "../../components/NotificationSnackBar"
+import { useSnackBar } from "../../components/NotificationSnackBar"
+import axios from "axios"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 

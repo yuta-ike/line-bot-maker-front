@@ -91,15 +91,20 @@ const Header: React.FC = () => {
                 {showPopover && (
                   <div className="absolute top-full right-0 w-[240px] flex-col rounded bg-white shadow-md">
                     <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
-                      <Image
-                        src={user.iconUrl ?? ""}
-                        css={css(classes.iconimage)}
-                        alt=""
-                        className="shrink-0"
-                        width="32px"
-                        height="32px"
-                      />
-                      <span className="block">{user.name}</span>
+                      <div className="h-8 w-8 shrink-0">
+                        <Image
+                          src={user.iconUrl ?? ""}
+                          css={css(classes.iconimage)}
+                          alt=""
+                          className="shrink-0"
+                          width="32px"
+                          height="32px"
+                        />
+                      </div>
+                      <div>
+                        <div>{user.name}</div>
+                        <div className="text-xs">DEBUG: {user.id}</div>
+                      </div>
                     </div>
                     <button
                       className="w-full px-4 py-3 text-left transition hover:bg-gray-100"
