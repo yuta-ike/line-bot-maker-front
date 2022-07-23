@@ -46,8 +46,10 @@ const theme = createTheme({
 })
 
 const Header: React.FC = () => {
-  const { logout } = useLiffOperation()
+  const { logout, login } = useLiffOperation()
   const user = useUser()
+
+  const [showPopover, setPopover] = useState(false)
 
   return (
     <ThemeProvider theme={theme}>
@@ -69,45 +71,54 @@ const Header: React.FC = () => {
             >
               Line Bot Maker
             </Typography>
-            {user?.iconUrl != null && (
+            {user != null ? (
               <div className="relative">
                 <IconButton
                   edge="end"
                   css={css(classes.menuButton)}
                   style={{ color: "#f8faf7" }}
                   aria-label="menu"
-                  className="peer"
+                  onClick={() => setPopover((prev) => !prev)}
                 >
                   <Image
-                    src={user.iconUrl}
+                    src={user.iconUrl ?? ""}
                     css={css(classes.iconimage)}
                     alt=""
                     width="32px"
                     height="32px"
                   />
                 </IconButton>
-                <div className="absolute top-full right-0 hidden w-[240px] flex-col rounded bg-white shadow-md peer-focus:flex">
-                  <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
-                    <Image
-                      src={user.iconUrl}
-                      css={css(classes.iconimage)}
-                      alt=""
-                      className="shrink-0"
-                      width="32px"
-                      height="32px"
-                    />
-                    <span className="block">{user.name}</span>
+                {showPopover && (
+                  <div className="absolute top-full right-0 w-[240px] flex-col rounded bg-white shadow-md">
+                    <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
+                      <Image
+                        src={user.iconUrl ?? ""}
+                        css={css(classes.iconimage)}
+                        alt=""
+                        className="shrink-0"
+                        width="32px"
+                        height="32px"
+                      />
+                      <span className="block">{user.name}</span>
+                    </div>
+                    <button
+                      className="w-full px-4 py-3 text-left transition hover:bg-gray-100"
+                      onClick={async () => {
+                        await logout()
+                      }}
+                    >
+                      ログアウト
+                    </button>
                   </div>
-                  <button
-                    className="px-4 py-3 text-left transition hover:bg-gray-100"
-                    onClick={async () => {
-                      await logout()
-                    }}
-                  >
-                    ログアウト
-                  </button>
-                </div>
+                )}
               </div>
+            ) : (
+              <button
+                onClick={() => login()}
+                className="rounded border-2 border-white px-4 py-2 text-white"
+              >
+                ログイン
+              </button>
             )}
           </Toolbar>
         </AppBar>

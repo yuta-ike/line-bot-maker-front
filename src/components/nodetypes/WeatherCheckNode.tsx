@@ -1,21 +1,8 @@
-import { useEffect, useState } from "react"
-import { GraphNodeClass } from "../editor/node"
-import Select from "react-select"
-
-// type Props = {
-//   node: GraphNodeClass
-// }
+import { useState } from "react"
 
 const WeatherCheckNode = () => {
-  const [selectedPrefecture, setSelectdePrefecture] = useState({
-    value: "Hokkaido",
-    label: "北海道",
-  })
-  // const options = [
-  //   { value: "chocolate", label: "Chocolate" },
-  //   { value: "strawberry", label: "Strawberry" },
-  //   { value: "vanilla", label: "Vanilla" },
-  // ]
+  const [selectedPrefecture, setSelectdePrefecture] = useState("Hokkaido")
+
   const options = [
     { value: "Kyoto", label: "京都" },
     { value: "Tokyo", label: "東京" },
@@ -25,19 +12,20 @@ const WeatherCheckNode = () => {
   ]
 
   return (
-    <div>
-      <div className="text-xs">天気予報</div>
-      <Select
-        options={options}
+    <div className="flex space-x-2">
+      <div className="">天気予報</div>
+      <select
         placeholder="選択してください"
-        defaultValue={{ value: "Hokkaido", label: "北海道" }}
-        // inputId="value"
-        // value={selectedPrefecture}
-        onChange={(value) => {
-          setSelectdePrefecture(value!)
-        }}
-      />
-      {/* <div className="text-black"></div> */}
+        value={selectedPrefecture}
+        className="rounded px-2 py-1 text-xs text-black"
+        onChange={(e) => setSelectdePrefecture(e.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }

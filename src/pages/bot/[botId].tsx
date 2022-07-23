@@ -66,7 +66,7 @@ const genInitNodes = () => [
         x: 50,
         y: 225,
       },
-      inPoints: [{ type: "number", label: "input", limit: null }],
+      inPoints: [{ type: "number", label: "", limit: null }],
       outPoints: [
         { type: "number", label: "yes", limit: null },
         { type: "number", label: "no", limit: null },
@@ -85,7 +85,7 @@ const genInitNodes = () => [
         x: 50,
         y: 350,
       },
-      inPoints: [{ type: "number", label: "input", limit: null }],
+      inPoints: [{ type: "number", label: "", limit: null }],
       outPoints: [
         { type: "number", label: "yes", limit: null },
         { type: "number", label: "no", limit: null },
@@ -104,7 +104,7 @@ const genInitNodes = () => [
         x: 50,
         y: 475,
       },
-      inPoints: [{ type: "number", label: "input", limit: null }],
+      inPoints: [{ type: "number", label: "", limit: null }],
       outPoints: [],
       isInitialNode: true,
     },
@@ -120,11 +120,11 @@ const genInitNodes = () => [
         x: 50,
         y: 600,
       },
-      inPoints: [{ type: "number", label: "input", limit: null }],
+      inPoints: [{ type: "number", label: "", limit: null }],
       outPoints: [
-        { type: "number", label: "sunny", limit: null },
-        { type: "number", label: "cloudy", limit: null },
-        { type: "number", label: "rainy", limit: null },
+        { type: "number", label: "晴れ", limit: null },
+        { type: "number", label: "曇り", limit: null },
+        { type: "number", label: "雨", limit: null },
       ],
       isInitialNode: true,
     },
@@ -744,7 +744,7 @@ const ComponentsSideList: React.FC = () => {
                                 )}
                               />
                               {/* outputの文字 */}
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                              <div className="absolute bottom-full left-1/2 w-max -translate-x-1/2 rounded-sm px-1 py-0.5 text-sm leading-none text-white">
                                 {point.label}
                               </div>
                             </button>
