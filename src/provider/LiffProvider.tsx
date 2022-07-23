@@ -54,12 +54,6 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
           iconUrl: profile.pictureUrl ?? null,
         },
       }))
-      const url = localStorage.getItem("URL")
-      console.log("URL", url)
-      if (url != null) {
-        router.push(url)
-        localStorage.removeItem("URL")
-      }
     })().catch((e) => console.error(e))
   }, [router])
 
