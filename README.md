@@ -17,6 +17,14 @@ npm install
 
 ### 開発サーバの立ち上げ
 
+- https の場合（LINE の認証を入れたので、https://localhost:3000 でしか動きません）
+
+```
+npm run dev:https
+```
+
+- http の場合（LINE の認証を一時的に外す必要があります）
+
 ```
 npm run dev
 ```
