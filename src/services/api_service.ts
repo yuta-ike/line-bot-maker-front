@@ -1,10 +1,12 @@
 import useSWR from 'swr'
 import axios from "axios"
 
+const url = 'http://localhost:8000'
+
 const fetcher = (url:string) => axios.get(url).then(res => res.data)
 
 export function GetBots () {
-    const { data, error } = useSWR('http://localhost:8000/getIdToken/bot', fetcher)
+    const { data, error } = useSWR(url+'/getIdToken/bot', fetcher)
 
     return {
         user: data,
@@ -14,7 +16,7 @@ export function GetBots () {
 }
 
 export function GetBot (id: string) {
-    const { data, error } = useSWR(`http://localhost:8000/getIdToken/bot/${id}`, fetcher)
+    const { data, error } = useSWR(url+`/getIdToken/bot/${id}`, fetcher)
 
     return {
         user: data,
@@ -24,7 +26,7 @@ export function GetBot (id: string) {
 }
 
 export function CreateBot (bot_id: string, name: string, developerId: string, flowChart: string) {
-    const res = axios.post('http://localhost:8000/getIdToken/bot', {
+    const res = axios.post(url+'/getIdToken/bot', {
         bot_id: bot_id,
         name: name,
         developerId: developerId,
@@ -32,7 +34,7 @@ export function CreateBot (bot_id: string, name: string, developerId: string, fl
       })
 
     return(res)
-
+}
 
 export function UpdateBot (bot_id: string, name: string, developerId: string, flowChart: string) {
     let data: {[key: string]: string};
@@ -50,13 +52,13 @@ export function UpdateBot (bot_id: string, name: string, developerId: string, fl
         data['flowChart'] = flowChart
     }
 
-    const res = axios.post(`http://localhost:8000/getIdToken/bot/${bot_id}`, data)
+    const res = axios.put(url+`/getIdToken/bot/${bot_id}`, data)
 
     return(res)
 }
 
 export function DeleteBot (bot_id: string) {
-    const res = axios.delete(`http://localhost:8000/getIdToken/bot/${bot_id}`)
+    const res = axios.delete(url+`/getIdToken/bot/${bot_id}`)
 
     return res
 }
