@@ -7,13 +7,12 @@ type Props = {
 
 const CorrespondCheckNode: React.FC<Props> = (props) => {
   const { node } = props
-  const [inputedText, setInputedText] = useState("")
+  const [inputedText, setInputedText] = useState(node.createrInputValue)
   useEffect(() => {
     const updateUserInputValue = () => {
       node.createrInputValue = inputedText
     }
     updateUserInputValue()
-    console.log(node.createrInputValue)
   }, [inputedText, node])
 
   return (

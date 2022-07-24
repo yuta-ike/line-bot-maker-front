@@ -29,7 +29,7 @@ const Line: React.FC<LineProps> = ({
   const deltaX = endPointPos.x - startPointPos.x
   const deltaY = endPointPos.y - startPointPos.y
   return (
-    <div className="absolute top-0 left-0">
+    <div className="pointer-events-none absolute top-0 left-0">
       <LineUI
         startPos={startPointPos}
         delta={{ x: deltaX, y: deltaY }}
