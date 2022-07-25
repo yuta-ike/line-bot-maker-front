@@ -1,11 +1,11 @@
 import useSWR from "swr"
 import axios from "axios"
 
-const url = "http://localhost:8000"
+const url = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data)
 
-export function GetBots() {
+export function useBots() {
   const { data, error } = useSWR(url + "/getIdToken/bot", fetcher)
 
   return {
@@ -15,7 +15,7 @@ export function GetBots() {
   }
 }
 
-export function GetBot(id: string) {
+export function useBot(id: string) {
   const { data, error } = useSWR(url + `/getIdToken/bot/${id}`, fetcher)
 
   return {
@@ -25,7 +25,7 @@ export function GetBot(id: string) {
   }
 }
 
-export function CreateBot(
+export function createBot(
   bot_id: string,
   name: string,
   developerId: string,
@@ -41,7 +41,7 @@ export function CreateBot(
   return res
 }
 
-export function UpdateBot(
+export function updateBot(
   bot_id: string,
   name: string,
   developerId: string,
@@ -67,7 +67,7 @@ export function UpdateBot(
   return res
 }
 
-export function DeleteBot(bot_id: string) {
+export function deleteBot(bot_id: string) {
   const res = axios.delete(url + `/getIdToken/bot/${bot_id}`)
 
   return res
