@@ -169,6 +169,14 @@ const checkNodeType = (node: GraphNodeClass) => {
   }
 }
 
+const unwrapId = (id: string): string => {
+  if (id.startsWith("SAVED_")) {
+    return unwrapId(id.slice("SAVED_".length))
+  } else {
+    return id
+  }
+}
+
 const ComponentsSideList: React.FC = () => {
   const router = useRouter()
   const botId = router.query.botId as string
@@ -493,15 +501,12 @@ const ComponentsSideList: React.FC = () => {
                   onChange={(e) => setTestcase(e.target.value)}
                 />
               </div>
-              {effectInputs?.map(({ nodeType, node }) => (
-                <div key={node.id}>
+              {effectInputs?.map(({ nodeType, node }, i) => (
+                <div key={node.id} className={classNames(i === 0 && "!mt-6")}>
                   <div className="text-sm text-gray-500">
                     ダミー値:{" "}
                     {nodeType === "weatherCheckNode" ? "天気" : "ランダム"}(#
-                    {node.id.startsWith("SAVED_")
-                      ? node.id.slice("SAVED_".length)
-                      : node.id}
-                    )
+                    {unwrapId(node.id)})
                   </div>
                   <select
                     className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
@@ -529,11 +534,11 @@ const ComponentsSideList: React.FC = () => {
                   </select>
                 </div>
               ))}
-              <div>
+              <div className="!mt-6">
                 <div className="text-sm text-gray-500">出力</div>
                 <input
                   className={classNames(
-                    "max-w-[203px] rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none",
+                    "max-w-[203px] rounded border border-[#efefef] bg-gray-100 bg-white px-3 py-2 focus:outline-none",
                     (result == null || result?.value === "") && "text-gray-300",
                   )}
                   value={result?.value || "<値なし>"}
@@ -541,41 +546,42 @@ const ComponentsSideList: React.FC = () => {
                   placeholder="出力"
                 />
               </div>
-
-              <div>
-                {result?.stackTrace?.map((trace, i) => (
-                  <div key={i}>
-                    {trace.result === "success" ? (
-                      <>
-                        <span className="text-sm">#{trace.nodeId}</span>
-                        <br />
-                        <code className="bg-blue-100">
-                          {trace.inMessage || "<入力なし>"}
-                        </code>{" "}
-                        to{" "}
-                        <code className="bg-blue-100">
-                          {trace.outMessage || "<入力なし>"}
-                        </code>
-                      </>
-                    ) : (
-                      <>
-                        {trace.nodeId}
-                        <br />
-                        <code className="bg-blue-100">{trace.inMessage}</code>
-                        <br />
-                        {trace.error}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-
               {result.error?.message != null && (
                 <div className="flex items-center space-x-1 text-sm text-red-500">
                   <FiAlertCircle className="shrink-0" />
                   <span>{result.error.message}</span>
                 </div>
               )}
+              <details className="!mt-auto">
+                <summary>デバッグログ</summary>
+                <div>
+                  {result?.stackTrace?.map((trace, i) => (
+                    <div key={i}>
+                      {trace.result === "success" ? (
+                        <>
+                          <span className="text-sm">#{trace.nodeId}</span>
+                          <br />
+                          <code className="bg-blue-100">
+                            {trace.inMessage || "<入力なし>"}
+                          </code>{" "}
+                          to{" "}
+                          <code className="bg-blue-100">
+                            {trace.outMessage || "<入力なし>"}
+                          </code>
+                        </>
+                      ) : (
+                        <>
+                          {trace.nodeId}
+                          <br />
+                          <code className="bg-blue-100">{trace.inMessage}</code>
+                          <br />
+                          {trace.error}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </details>
             </div>
             <div
               id={rootId}
@@ -835,10 +841,7 @@ const ComponentsSideList: React.FC = () => {
                         node.node.nodeType === "randomNode") &&
                         !node.isInitialNode && (
                           <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
-                            #
-                            {node.id.startsWith("SAVED_")
-                              ? node.id.slice("SAVED_".length)
-                              : node.id}
+                            #{unwrapId(node.id)}
                           </div>
                         )}
                     </div>
