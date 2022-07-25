@@ -9,9 +9,14 @@ type FlowInputParam = {
  * フローチャートを実行する
  * @param flowChart 実行するフローチャート
  * @param param1 実行に必要な値
+ * @param mockValues モック用の値
  * @returns 実行結果
  */
-const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
+const execFlowChart = (
+  flowChart: FlowChart,
+  { message }: FlowInputParam,
+  mockValues?: Record<string, string>,
+) => {
   // validation: input node
   const inputNodes = flowChart.filter(
     (chart) => chart.node.node.nodeType === "textInputNode",
@@ -61,6 +66,7 @@ const execFlowChart = (flowChart: FlowChart, { message }: FlowInputParam) => {
       flowChart,
       nextNodeId,
       message,
+      mockValues,
     )
     if (result.status === "failure") {
       result.error.stackTrace = stackTrace
@@ -118,6 +124,7 @@ type FlowChartStepResult =
  * @param stackTrace スタックトレースを溜める配列
  * @param flowChart 実行するフローチャート
  * @param nextNodeId 今から実行するNodeId
+ * @param mockValues モック用の値
  * @param value 次のノードに渡す値
  * @returns 実行結果
  */
@@ -126,8 +133,9 @@ const stepFlowChartProxy = (
   flowChart: FlowChart,
   nextNodeId: string | null,
   value: string,
+  mockValues?: Record<string, string>,
 ): FlowChartStepResult => {
-  const result = stepFlowChart(flowChart, nextNodeId, value)
+  const result = stepFlowChart(flowChart, nextNodeId, value, mockValues)
   if (result.status === "success") {
     stackTrace.push({
       result: "success",
@@ -152,12 +160,14 @@ const stepFlowChartProxy = (
  * @param flowChart 実行するフローチャート
  * @param nextNodeId 今から実行するNodeId
  * @param value 次のノードに渡す値
+ * @param mockValues モック用の値
  * @returns 実行結果
  */
 const stepFlowChart = (
   flowChart: FlowChart,
   nextNodeId: string | null,
   value: string,
+  mockValues?: Record<string, string>,
 ): FlowChartStepResult => {
   if (nextNodeId == null) {
     return {
@@ -238,7 +248,50 @@ const stepFlowChart = (
   }
 
   if (nextNode.node.node.nodeType === "weatherCheckNode") {
-    // TODO: 天気のーど
+    let outputNodeId: number
+    if (mockValues != null) {
+      if (mockValues[nextNodeId]) {
+        const mockValue = mockValues[nextNodeId]
+        outputNodeId =
+          mockValue === "sunny" ? 0 : mockValue === "cloudy" ? 1 : 2
+      } else {
+        outputNodeId = 0
+      }
+    } else {
+      const rand = Math.random()
+      const weather = rand < 0.33 ? 0 : rand < 0.66 ? 1 : 2
+      outputNodeId = weather
+    }
+
+    return {
+      status: "success",
+      nextNodeId: nextNode.outputs[outputNodeId],
+      value,
+      done: false,
+    }
+  }
+
+  if (nextNode.node.node.nodeType === "randomNode") {
+    let outputNodeId: number
+    if (mockValues != null) {
+      if (mockValues[nextNodeId]) {
+        const mockValue = mockValues[nextNodeId]
+        outputNodeId = mockValue === "A" ? 0 : 1
+      } else {
+        outputNodeId = 0
+      }
+    } else {
+      const rand = Math.random()
+      const weather = rand < 0.5 ? 0 : 1
+      outputNodeId = weather
+    }
+
+    return {
+      status: "success",
+      nextNodeId: nextNode.outputs[outputNodeId],
+      value,
+      done: false,
+    }
   }
 
   if (nextNode.node.node.nodeType === "textOutputNode") {
