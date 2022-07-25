@@ -33,6 +33,7 @@ import buildInviteMessage from "../../components/utils/flexMessage"
 import { useSnackBar } from "../../components/NotificationSnackBar"
 import axios from "axios"
 import { deleteBot, getBot, updateBot } from "../../services/api_service"
+import RandomNode from "../../components/nodetypes/RandomNode"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
@@ -129,6 +130,25 @@ const genInitNodes = () => [
       isInitialNode: true,
     },
   ),
+  new GraphNodeClass(
+    {
+      label: "ランダム選択",
+      color: "#4169e1",
+      nodeType: "randomNode",
+    },
+    {
+      pos: {
+        x: 50,
+        y: 725,
+      },
+      inPoints: [{ type: "number", label: "", limit: null }],
+      outPoints: [
+        { type: "number", label: "A", limit: null },
+        { type: "number", label: "B", limit: null },
+      ],
+      isInitialNode: true,
+    },
+  ),
 ]
 
 const checkNodeType = (node: GraphNodeClass) => {
@@ -142,6 +162,8 @@ const checkNodeType = (node: GraphNodeClass) => {
     return <TextOutputNode node={node} />
   } else if (node.node.nodeType == "weatherCheckNode") {
     return <WeatherCheckNode />
+  } else if (node.node.nodeType == "randomNode") {
+    return <RandomNode />
   } else {
     return node.node.label
   }
@@ -159,6 +181,7 @@ const ComponentsSideList: React.FC = () => {
   const [nodes, setNodes] = useState<GraphNodeClass[]>(() => genInitNodes())
   const [edges, setEdges] = useState<Edge[]>([])
   const [testcase, setTestcase] = useState("Hello")
+  const [mockValues, setMockValues] = useState<Record<string, string>>({})
 
   const [focusItemId, setFocusItemId] = useState<
     | { type: "node"; nodeId: string }
@@ -339,6 +362,7 @@ const ComponentsSideList: React.FC = () => {
         {
           message: testcase,
         },
+        mockValues,
       )
       return {
         ...result,
@@ -355,7 +379,7 @@ const ComponentsSideList: React.FC = () => {
         throw e
       }
     }
-  }, [edges, nodes, testcase])
+  }, [edges, mockValues, nodes, testcase])
 
   /**
    * フローチャートの保存処理
@@ -425,6 +449,30 @@ const ComponentsSideList: React.FC = () => {
     }
   }, [botId, router, showSnackBar])
 
+  const effectInputs = useMemo(
+    () =>
+      nodes
+        .filter(({ isInitialNode }) => !isInitialNode)
+        .map((node) => {
+          if (node.node.nodeType === "weatherCheckNode") {
+            return { nodeType: "weatherCheckNode", node }
+          } else if (node.node.nodeType === "randomNode") {
+            return { nodeType: "randomNode", node }
+          } else {
+            return null
+          }
+        })
+        .filter(
+          (
+            nodeType,
+          ): nodeType is {
+            nodeType: string
+            node: GraphNodeClass
+          } => nodeType != null,
+        ),
+    [nodes],
+  )
+
   const rootId = useId()
 
   return (
@@ -439,17 +487,53 @@ const ComponentsSideList: React.FC = () => {
                 <div className="text-sm text-gray-500">入力</div>
                 <input
                   type="text"
-                  className="rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+                  className="max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
                   placeholder="入力値"
                   value={testcase}
                   onChange={(e) => setTestcase(e.target.value)}
                 />
               </div>
+              {effectInputs?.map(({ nodeType, node }) => (
+                <div key={node.id}>
+                  <div className="text-sm text-gray-500">
+                    ダミー値:{" "}
+                    {nodeType === "weatherCheckNode" ? "天気" : "ランダム"}(#
+                    {node.id.startsWith("SAVED_")
+                      ? node.id.slice("SAVED_".length)
+                      : node.id}
+                    )
+                  </div>
+                  <select
+                    className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+                    placeholder="入力値"
+                    value={mockValues[node.id]}
+                    onChange={(e) =>
+                      setMockValues((prev) => ({
+                        ...prev,
+                        [node.id]: e.target.value,
+                      }))
+                    }
+                  >
+                    {nodeType === "weatherCheckNode" ? (
+                      <>
+                        <option value="sunny">晴れ</option>
+                        <option value="cloudy">曇り</option>
+                        <option value="rainy">雨</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              ))}
               <div>
                 <div className="text-sm text-gray-500">出力</div>
                 <input
                   className={classNames(
-                    "rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none",
+                    "max-w-[203px] rounded border border-[#efefef] bg-white px-3 py-2 focus:outline-none",
                     (result == null || result?.value === "") && "text-gray-300",
                   )}
                   value={result?.value || "<値なし>"}
@@ -746,6 +830,17 @@ const ComponentsSideList: React.FC = () => {
                           ))}
                         </div>
                       </div>
+                      {/* ID表示 */}
+                      {(node.node.nodeType === "weatherCheckNode" ||
+                        node.node.nodeType === "randomNode") &&
+                        !node.isInitialNode && (
+                          <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
+                            #
+                            {node.id.startsWith("SAVED_")
+                              ? node.id.slice("SAVED_".length)
+                              : node.id}
+                          </div>
+                        )}
                     </div>
                   </Draggable>
                 )
