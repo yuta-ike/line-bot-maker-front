@@ -28,14 +28,12 @@ import TopBar from "../../components/TopBar"
 import BottomBar from "../../components/BottomBar"
 import { useRouter } from "next/router"
 import { useLiff, useUser } from "../../provider/LiffProvider"
-import { FlowChart } from "../../interpreter/type"
+import { FlowChart, StackTrace } from "../../interpreter/type"
 import buildInviteMessage from "../../components/utils/flexMessage"
 import { useSnackBar } from "../../components/NotificationSnackBar"
-import axios from "axios"
 import { deleteBot, getBot, updateBot } from "../../services/api_service"
 import RandomNode from "../../components/nodetypes/RandomNode"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
+import Head from "next/head"
 
 //nodeの初期値を設定
 //初期で4個のnodeを定義している
@@ -353,6 +351,9 @@ const ComponentsSideList: React.FC = () => {
             const relatedEdges = edges.filter(
               ({ start }) => start.nodeId === node.id,
             )
+            const relatedEdgeMap = Object.fromEntries(
+              relatedEdges.map(({ start, end }) => [start.pointId, end.nodeId]),
+            )
             return {
               id: node.id,
               node: {
@@ -364,7 +365,8 @@ const ComponentsSideList: React.FC = () => {
                   | "nop",
                 userInputValue: node.createrInputValue,
               },
-              outputs: relatedEdges.map(({ end }) => end.nodeId),
+              // outputs: relatedEdges.map(({ end }) => end.nodeId),
+              outputs: node.outPoints.map((_, i) => relatedEdgeMap[i]),
             }
           }),
         {
@@ -484,384 +486,393 @@ const ComponentsSideList: React.FC = () => {
   const rootId = useId()
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex-grow">
-        <TopBar name={name} onChangeName={setName} />
-        <div id="concept">
-          {/* 枠線の指定 */}
-          <div className="flex">
-            <div className="fixed inset-y-[60px] right-0 m-4 flex w-max max-w-[30%] flex-col space-y-2 overflow-y-scroll break-all rounded border-2 border-[#efefef] bg-white/50 p-4 backdrop-blur">
-              <div>
-                <div className="text-sm text-gray-500">入力</div>
-                <input
-                  type="text"
-                  className="max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
-                  placeholder="入力値"
-                  value={testcase}
-                  onChange={(e) => setTestcase(e.target.value)}
-                />
-              </div>
-              {effectInputs?.map(({ nodeType, node }, i) => (
-                <div key={node.id} className={classNames(i === 0 && "!mt-6")}>
-                  <div className="text-sm text-gray-500">
-                    ダミー値:{" "}
-                    {nodeType === "weatherCheckNode" ? "天気" : "ランダム"}(#
-                    {unwrapId(node.id)})
-                  </div>
-                  <select
-                    className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
-                    placeholder="入力値"
-                    value={mockValues[node.id]}
-                    onChange={(e) =>
-                      setMockValues((prev) => ({
-                        ...prev,
-                        [node.id]: e.target.value,
-                      }))
-                    }
-                  >
-                    {nodeType === "weatherCheckNode" ? (
-                      <>
-                        <option value="sunny">晴れ</option>
-                        <option value="cloudy">曇り</option>
-                        <option value="rainy">雨</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              ))}
-              <div className="!mt-6">
-                <div className="text-sm text-gray-500">出力</div>
-                <input
-                  className={classNames(
-                    "max-w-[203px] rounded border border-[#efefef] bg-gray-100 bg-white px-3 py-2 focus:outline-none",
-                    (result == null || result?.value === "") && "text-gray-300",
-                  )}
-                  value={result?.value || "<値なし>"}
-                  disabled
-                  placeholder="出力"
-                />
-              </div>
-              {result.error?.message != null && (
-                <div className="flex items-center space-x-1 text-sm text-red-500">
-                  <FiAlertCircle className="shrink-0" />
-                  <span>{result.error.message}</span>
-                </div>
-              )}
-              <details className="!mt-auto">
-                <summary>デバッグログ</summary>
+    <>
+      <Head>
+        <title>{`${name}｜LINE Bot Maker`}</title>
+      </Head>
+      <div className="flex min-h-screen flex-col">
+        <main className="flex-grow">
+          <TopBar name={name} onChangeName={setName} />
+          <div id="concept">
+            {/* 枠線の指定 */}
+            <div className="flex">
+              <div className="fixed inset-y-[60px] right-0 m-4 flex w-max max-w-[30%] flex-col space-y-2 overflow-y-scroll break-all rounded border-2 border-[#efefef] bg-white/50 p-4 backdrop-blur">
                 <div>
-                  {result?.stackTrace?.map((trace, i) => (
-                    <div key={i}>
-                      {trace.result === "success" ? (
+                  <div className="text-sm text-gray-500">入力</div>
+                  <input
+                    type="text"
+                    className="max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+                    placeholder="入力値"
+                    value={testcase}
+                    onChange={(e) => setTestcase(e.target.value)}
+                  />
+                </div>
+                {effectInputs?.map(({ nodeType, node }, i) => (
+                  <div key={node.id} className={classNames(i === 0 && "!mt-6")}>
+                    <div className="text-sm text-gray-500">
+                      ダミー値:{" "}
+                      {nodeType === "weatherCheckNode" ? "天気" : "ランダム"}(#
+                      {unwrapId(node.id)})
+                    </div>
+                    <select
+                      className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+                      placeholder="入力値"
+                      value={mockValues[node.id]}
+                      onChange={(e) =>
+                        setMockValues((prev) => ({
+                          ...prev,
+                          [node.id]: e.target.value,
+                        }))
+                      }
+                    >
+                      {nodeType === "weatherCheckNode" ? (
                         <>
-                          <span className="text-sm">#{trace.nodeId}</span>
-                          <br />
-                          <code className="bg-blue-100">
-                            {trace.inMessage || "<入力なし>"}
-                          </code>{" "}
-                          to{" "}
-                          <code className="bg-blue-100">
-                            {trace.outMessage || "<入力なし>"}
-                          </code>
+                          <option value="sunny">晴れ</option>
+                          <option value="cloudy">曇り</option>
+                          <option value="rainy">雨</option>
                         </>
                       ) : (
                         <>
-                          {trace.nodeId}
-                          <br />
-                          <code className="bg-blue-100">{trace.inMessage}</code>
-                          <br />
-                          {trace.error}
+                          <option value="A">A</option>
+                          <option value="B">B</option>
                         </>
                       )}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            </div>
-            <div
-              id={rootId}
-              className="draggable-parent static min-h-screen flex-grow border border-blue-100"
-              onClick={(e) => {
-                // @ts-ignore
-                if (e.target.id === rootId) {
-                  setFocusItemId(null)
-                }
-                setTempEdgeStartNodeId(null)
-              }}
-            >
-              {/* 線? */}
-              {tmpEdgeStartNode != null &&
-                (() => {
-                  const tmpStartNode = getNode(tmpEdgeStartNode.node.id)
-                  if (tmpStartNode == null) {
-                    return null
-                  }
-                  //始点のデータを取得
-                  const startPointPos = getPointPos(
-                    "out",
-                    tmpStartNode,
-                    tmpEdgeStartNode.pointId,
-                  )
-                  return (
-                    <div
-                      className="absolute top-0 left-0 h-full w-full"
-                      key="temp"
-                    >
-                      <LineUI
-                        startPos={startPointPos}
-                        //このデルタはなに？
-                        delta={{
-                          //-32を消した
-                          x: cursorPos.x - startPointPos.x,
-                          y: cursorPos.y - startPointPos.y,
-                        }}
-                      />
-                    </div>
-                  )
-                })()}
-              {edges.map((edge) => {
-                const startNode = getNode(edge.start.nodeId)
-                const endNode = getNode(edge.end.nodeId)
-                if (startNode == null || endNode == null) {
-                  return
-                }
-                return (
-                  <Line
-                    key={calcEdgeId(edge)}
-                    start={{
-                      node: startNode,
-                      pointId: edge.start.pointId,
-                    }}
-                    end={{
-                      node: endNode,
-                      pointId: edge.end.pointId,
-                    }}
-                    isFocused={
-                      focusItemId?.type === "edge" &&
-                      focusItemId.start.nodeId === edge.start.nodeId &&
-                      focusItemId.start.pointId === edge.start.pointId &&
-                      focusItemId.end.nodeId === edge.end.nodeId &&
-                      focusItemId.end.pointId === edge.end.pointId
-                    }
-                    onFocus={() =>
-                      setFocusItemId({
-                        type: "edge",
-                        start: {
-                          nodeId: edge.start.nodeId,
-                          pointId: edge.start.pointId,
-                        },
-                        end: {
-                          nodeId: edge.end.nodeId,
-                          pointId: edge.end.pointId,
-                        },
-                      })
-                    }
-                    onDelete={() =>
-                      setEdges((edges) =>
-                        edges.filter((e) => !isSameEdge(e, edge)),
-                      )
-                    }
+                    </select>
+                  </div>
+                ))}
+                <div className="!mt-6">
+                  <div className="text-sm text-gray-500">出力</div>
+                  <input
+                    className={classNames(
+                      "max-w-[203px] rounded border border-[#efefef] bg-gray-100 bg-white px-3 py-2 focus:outline-none",
+                      (result == null || result?.value === "") &&
+                        "text-gray-300",
+                    )}
+                    value={result?.value || "<値なし>"}
+                    disabled
+                    placeholder="出力"
                   />
-                )
-              })}
-
-              {nodes.map((node) => {
-                const isFocused =
-                  focusItemId?.type === "node" && focusItemId.nodeId === node.id
-                return (
-                  <Draggable
-                    key={node.id}
-                    position={node.pos}
-                    bounds=".draggable-parent"
-                    defaultClassName="!absolute top-0 left-0"
-                    defaultClassNameDragging="group"
-                    //dataはカーソルの位置が入る？
-                    onDrag={(_, data) =>
-                      setNodes((nodes) =>
-                        nodes.map((n) =>
-                          n.id !== node.id
-                            ? n
-                            : n.setPos({
-                                x: Math.round(data.x),
-                                y: Math.round(data.y),
-                              }),
-                        ),
-                      )
-                    }
-                    onStart={() => {
-                      regenerateNode(node)
-                      // NOTE: 本当は良くない
-                      node.isInitialNode = false
-                    }}
-                  >
-                    <div>
-                      {/* コピーと削除のボタン */}
-                      {/* TODO: 現在はフォーカスされている時に表示されるが、うざいので改善したい */}
-                      <div
-                        className={classNames(
-                          "absolute top-0 ml-2 flex flex-col space-y-1 transition-[left]",
-                          isFocused ? "left-full" : "left-0",
+                </div>
+                {result.error?.message != null && (
+                  <div className="flex items-center space-x-1 text-sm text-red-500">
+                    <FiAlertCircle className="shrink-0" />
+                    <span>{result.error.message}</span>
+                  </div>
+                )}
+                <details className="!mt-auto">
+                  <summary>デバッグログ</summary>
+                  <div>
+                    {result?.stackTrace?.map((trace, i) => (
+                      <div key={i}>
+                        {trace.result === "success" ? (
+                          <>
+                            <span className="text-sm">#{trace.nodeId}</span>
+                            <br />
+                            <code className="bg-blue-100">
+                              {trace.inMessage || "<入力なし>"}
+                            </code>{" "}
+                            to{" "}
+                            <code className="bg-blue-100">
+                              {trace.outMessage || "<入力なし>"}
+                            </code>
+                          </>
+                        ) : (
+                          <>
+                            {trace.nodeId}
+                            <br />
+                            <code className="bg-blue-100">
+                              {trace.inMessage}
+                            </code>
+                            <br />
+                            {trace.error}
+                          </>
                         )}
-                      >
-                        <button
-                          className="flex w-max items-center space-x-1 rounded bg-blue-400 px-2 py-1 text-sm text-white"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDuplicate(node)
-                          }}
-                        >
-                          <FiCopy size="16px" />
-                          <span>コピー</span>
-                        </button>
-                        <button
-                          className="flex w-max items-center space-x-1 rounded bg-red-400 px-2 py-1 text-sm text-white"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(node)
-                          }}
-                        >
-                          <FiTrash2 size="16px" />
-                          <span>ゴミ箱</span>
-                        </button>
                       </div>
-
-                      {/* <> */}
-                      {/* nodeの大枠を決める */}
+                    ))}
+                  </div>
+                </details>
+              </div>
+              <div
+                id={rootId}
+                className="draggable-parent static min-h-screen flex-grow border border-blue-100"
+                onClick={(e) => {
+                  // @ts-ignore
+                  if (e.target.id === rootId) {
+                    setFocusItemId(null)
+                  }
+                  setTempEdgeStartNodeId(null)
+                }}
+              >
+                {/* 線? */}
+                {tmpEdgeStartNode != null &&
+                  (() => {
+                    const tmpStartNode = getNode(tmpEdgeStartNode.node.id)
+                    if (tmpStartNode == null) {
+                      return null
+                    }
+                    //始点のデータを取得
+                    const startPointPos = getPointPos(
+                      "out",
+                      tmpStartNode,
+                      tmpEdgeStartNode.pointId,
+                    )
+                    return (
                       <div
-                        className={classNames(
-                          "relative flex h-[90px] w-40 items-center justify-center rounded text-white shadow transition",
-                          isFocused &&
-                            "ring-4 ring-blue-400 group-hover:shadow-2xl group-hover:ring-0",
-                        )}
-                        style={{ background: node.node.color }}
-                        onClick={() =>
-                          setFocusItemId({
-                            type: "node",
-                            nodeId: node.id,
-                          })
-                        }
+                        className="absolute top-0 left-0 h-full w-full"
+                        key="temp"
                       >
-                        {checkNodeType(node)}
-                        {/* 位置 */}
-                        <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
-                          {/* 機能 */}
-                          {node.inPoints.map((point, i) => {
-                            const isConnectableWithTempNode =
-                              tmpEdgeStartNode != null &&
-                              node.canConnect(
-                                i,
-                                tmpEdgeStartNode.node,
-                                tmpEdgeStartNode.pointId,
-                              )
+                        <LineUI
+                          startPos={startPointPos}
+                          //このデルタはなに？
+                          delta={{
+                            //-32を消した
+                            x: cursorPos.x - startPointPos.x,
+                            y: cursorPos.y - startPointPos.y,
+                          }}
+                        />
+                      </div>
+                    )
+                  })()}
+                {edges.map((edge) => {
+                  const startNode = getNode(edge.start.nodeId)
+                  const endNode = getNode(edge.end.nodeId)
+                  if (startNode == null || endNode == null) {
+                    return
+                  }
+                  return (
+                    <Line
+                      key={calcEdgeId(edge)}
+                      start={{
+                        node: startNode,
+                        pointId: edge.start.pointId,
+                      }}
+                      end={{
+                        node: endNode,
+                        pointId: edge.end.pointId,
+                      }}
+                      isFocused={
+                        focusItemId?.type === "edge" &&
+                        focusItemId.start.nodeId === edge.start.nodeId &&
+                        focusItemId.start.pointId === edge.start.pointId &&
+                        focusItemId.end.nodeId === edge.end.nodeId &&
+                        focusItemId.end.pointId === edge.end.pointId
+                      }
+                      onFocus={() =>
+                        setFocusItemId({
+                          type: "edge",
+                          start: {
+                            nodeId: edge.start.nodeId,
+                            pointId: edge.start.pointId,
+                          },
+                          end: {
+                            nodeId: edge.end.nodeId,
+                            pointId: edge.end.pointId,
+                          },
+                        })
+                      }
+                      onDelete={() =>
+                        setEdges((edges) =>
+                          edges.filter((e) => !isSameEdge(e, edge)),
+                        )
+                      }
+                    />
+                  )
+                })}
 
-                            return (
+                {nodes.map((node) => {
+                  const isFocused =
+                    focusItemId?.type === "node" &&
+                    focusItemId.nodeId === node.id
+                  return (
+                    <Draggable
+                      key={node.id}
+                      position={node.pos}
+                      bounds=".draggable-parent"
+                      defaultClassName="!absolute top-0 left-0"
+                      defaultClassNameDragging="group"
+                      //dataはカーソルの位置が入る？
+                      onDrag={(_, data) =>
+                        setNodes((nodes) =>
+                          nodes.map((n) =>
+                            n.id !== node.id
+                              ? n
+                              : n.setPos({
+                                  x: Math.round(data.x),
+                                  y: Math.round(data.y),
+                                }),
+                          ),
+                        )
+                      }
+                      onStart={() => {
+                        regenerateNode(node)
+                        // NOTE: 本当は良くない
+                        node.isInitialNode = false
+                      }}
+                    >
+                      <div>
+                        {/* コピーと削除のボタン */}
+                        {/* TODO: 現在はフォーカスされている時に表示されるが、うざいので改善したい */}
+                        <div
+                          className={classNames(
+                            "absolute top-0 ml-2 flex flex-col space-y-1 transition-[left]",
+                            isFocused ? "left-full" : "left-0",
+                          )}
+                        >
+                          <button
+                            className="flex w-max items-center space-x-1 rounded bg-blue-400 px-2 py-1 text-sm text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDuplicate(node)
+                            }}
+                          >
+                            <FiCopy size="16px" />
+                            <span>コピー</span>
+                          </button>
+                          <button
+                            className="flex w-max items-center space-x-1 rounded bg-red-400 px-2 py-1 text-sm text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDelete(node)
+                            }}
+                          >
+                            <FiTrash2 size="16px" />
+                            <span>ゴミ箱</span>
+                          </button>
+                        </div>
+
+                        {/* <> */}
+                        {/* nodeの大枠を決める */}
+                        <div
+                          className={classNames(
+                            "relative flex h-[90px] w-40 items-center justify-center rounded text-white shadow transition",
+                            isFocused &&
+                              "ring-4 ring-blue-400 group-hover:shadow-2xl group-hover:ring-0",
+                          )}
+                          style={{ background: node.node.color }}
+                          onClick={() =>
+                            setFocusItemId({
+                              type: "node",
+                              nodeId: node.id,
+                            })
+                          }
+                        >
+                          {checkNodeType(node)}
+                          {/* 位置 */}
+                          <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 justify-evenly">
+                            {/* 機能 */}
+                            {node.inPoints.map((point, i) => {
+                              const isConnectableWithTempNode =
+                                tmpEdgeStartNode != null &&
+                                node.canConnect(
+                                  i,
+                                  tmpEdgeStartNode.node,
+                                  tmpEdgeStartNode.pointId,
+                                )
+
+                              return (
+                                <button
+                                  key={i}
+                                  className="relative"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    if (!isConnectableWithTempNode) {
+                                      return
+                                    }
+                                    const edge = {
+                                      start: {
+                                        nodeId: tmpEdgeStartNode.node.id,
+                                        pointId: tmpEdgeStartNode.pointId,
+                                      },
+                                      end: {
+                                        nodeId: node.id,
+                                        pointId: i,
+                                      },
+                                    }
+                                    setEdges((prev) => [...prev, edge])
+                                    setTempEdgeStartNodeId(null)
+                                  }}
+                                >
+                                  {/* inputを選択しているときに，つなげられる可能性のある点の色分け */}
+                                  <div
+                                    className={classNames(
+                                      "h-5 w-5 rounded-full border-2 border-white transition",
+                                      tmpEdgeStartNodeId == null
+                                        ? "border-white bg-green-500 hover:scale-110"
+                                        : isConnectableWithTempNode
+                                        ? "scale-100 border-white bg-green-500 hover:scale-110"
+                                        : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
+                                    )}
+                                  />
+                                  {/* inputの文字 */}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                                    {point.label}
+                                  </div>
+                                </button>
+                              )
+                            })}
+                          </div>
+                          {/* outPointsの描画 */}
+                          <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 justify-evenly">
+                            {node.outPoints.map((point, i) => (
                               <button
                                 key={i}
                                 className="relative"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  if (!isConnectableWithTempNode) {
+                                  if (tmpEdgeStartNode != null) {
                                     return
                                   }
-                                  const edge = {
-                                    start: {
-                                      nodeId: tmpEdgeStartNode.node.id,
-                                      pointId: tmpEdgeStartNode.pointId,
-                                    },
-                                    end: {
-                                      nodeId: node.id,
-                                      pointId: i,
-                                    },
-                                  }
-                                  setEdges((prev) => [...prev, edge])
-                                  setTempEdgeStartNodeId(null)
+                                  setFocusItemId(null)
+                                  setTempEdgeStartNodeId({
+                                    nodeId: node.id,
+                                    pointId: i,
+                                  })
                                 }}
                               >
-                                {/* inputを選択しているときに，つなげられる可能性のある点の色分け */}
+                                {/* inPointsを選択中に，outPointsの色を変更する */}
                                 <div
                                   className={classNames(
                                     "h-5 w-5 rounded-full border-2 border-white transition",
                                     tmpEdgeStartNodeId == null
-                                      ? "border-white bg-green-500 hover:scale-110"
-                                      : isConnectableWithTempNode
-                                      ? "scale-100 border-white bg-green-500 hover:scale-110"
-                                      : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
+                                      ? "bg-yellow-500 hover:scale-110"
+                                      : "scale-50 cursor-not-allowed bg-gray-300",
                                   )}
                                 />
-                                {/* inputの文字 */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                                {/* outputの文字 */}
+                                <div className="absolute bottom-full left-1/2 w-max -translate-x-1/2 rounded-sm px-1 py-0.5 text-sm leading-none text-white">
                                   {point.label}
                                 </div>
                               </button>
-                            )
-                          })}
-                        </div>
-                        {/* outPointsの描画 */}
-                        <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 justify-evenly">
-                          {node.outPoints.map((point, i) => (
-                            <button
-                              key={i}
-                              className="relative"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                if (tmpEdgeStartNode != null) {
-                                  return
-                                }
-                                setFocusItemId(null)
-                                setTempEdgeStartNodeId({
-                                  nodeId: node.id,
-                                  pointId: i,
-                                })
-                              }}
-                            >
-                              {/* inPointsを選択中に，outPointsの色を変更する */}
-                              <div
-                                className={classNames(
-                                  "h-5 w-5 rounded-full border-2 border-white transition",
-                                  tmpEdgeStartNodeId == null
-                                    ? "bg-yellow-500 hover:scale-110"
-                                    : "scale-50 cursor-not-allowed bg-gray-300",
-                                )}
-                              />
-                              {/* outputの文字 */}
-                              <div className="absolute bottom-full left-1/2 w-max -translate-x-1/2 rounded-sm px-1 py-0.5 text-sm leading-none text-white">
-                                {point.label}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      {/* ID表示 */}
-                      {(node.node.nodeType === "weatherCheckNode" ||
-                        node.node.nodeType === "randomNode") &&
-                        !node.isInitialNode && (
-                          <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
-                            #{unwrapId(node.id)}
+                            ))}
                           </div>
-                        )}
-                    </div>
-                  </Draggable>
-                )
-              })}
+                        </div>
+                        {/* ID表示 */}
+                        {(node.node.nodeType === "weatherCheckNode" ||
+                          node.node.nodeType === "randomNode") &&
+                          !node.isInitialNode && (
+                            <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
+                              #{unwrapId(node.id)}
+                            </div>
+                          )}
+                      </div>
+                    </Draggable>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      <footer>
-        <BottomBar
-          botId={botId}
-          onSave={handleSave}
-          onShare={handleShare}
-          onDelete={handleDeleteBot}
-          onReset={handleReset}
-        />
-      </footer>
-    </div>
+        </main>
+        <footer>
+          <BottomBar
+            botId={botId}
+            onSave={handleSave}
+            onShare={handleShare}
+            onDelete={handleDeleteBot}
+            onReset={handleReset}
+          />
+        </footer>
+      </div>
+    </>
   )
 }
 
