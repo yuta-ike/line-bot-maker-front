@@ -5,33 +5,33 @@ const url = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data)
 
-export function useBots() {
-  const { data, error } = useSWR(url + "/getIdToken/bot", fetcher)
+export function useBots(developerId?: string) {
+  const { data, error } = useSWR(
+    developerId == null
+      ? null
+      : url + "/getIdToken/bot?developerId=" + developerId,
+    fetcher,
+  )
 
   return {
-    user: data,
+    data,
     isLoading: !error && !data,
     isError: error,
   }
 }
 
-export function useBot(id: string) {
-  const { data, error } = useSWR(url + `/getIdToken/bot/${id}`, fetcher)
-
-  return {
-    user: data,
-    isLoading: !error && !data,
-    isError: error,
-  }
+export async function getBot(id: string) {
+  const res = await axios.get(url + `/getIdToken/bot/${id}`)
+  return res.data
 }
 
-export function createBot(
+export async function createBot(
   bot_id: string,
   name: string,
   developerId: string,
   flowChart: string,
 ) {
-  const res = axios.post(url + "/getIdToken/bot", {
+  const res = await axios.post(url + "/getIdToken/bot", {
     bot_id: bot_id,
     name: name,
     developerId: developerId,
@@ -41,7 +41,7 @@ export function createBot(
   return res
 }
 
-export function updateBot(
+export async function updateBot(
   bot_id: string,
   name: string,
   developerId: string,
@@ -62,13 +62,20 @@ export function updateBot(
     data["flowChart"] = flowChart
   }
 
-  const res = axios.put(url + `/getIdToken/bot/${bot_id}`, data)
+  const res = await axios.put(url + `/getIdToken/bot/${bot_id}`, data)
 
   return res
 }
 
-export function deleteBot(bot_id: string) {
-  const res = axios.delete(url + `/getIdToken/bot/${bot_id}`)
+export async function deleteBot(bot_id: string) {
+  const res = await axios.delete(url + `/getIdToken/bot/${bot_id}`)
+  return res
+}
 
+export async function activateBot(developerId: string, bot_id: string) {
+  const res = await axios.post(url + `/getIdToken/activate`, {
+    user_id: developerId,
+    bot_id,
+  })
   return res
 }
