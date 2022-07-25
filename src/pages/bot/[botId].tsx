@@ -32,6 +32,7 @@ import { FlowChart } from "../../interpreter/type"
 import buildInviteMessage from "../../components/utils/flexMessage"
 import { useSnackBar } from "../../components/NotificationSnackBar"
 import axios from "axios"
+import { deleteBot, getBot, updateBot } from "../../services/api_service"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
 
@@ -183,11 +184,8 @@ const ComponentsSideList: React.FC = () => {
       return
     }
     ;(async () => {
-      // NOTE: API呼び出しがまだ未実装なためreturn
-      return
-
-      const res = null as any // NOTE: API呼び出し: GET /bot/:botid
-      const flowChart: FlowChart = JSON.parse(res.data.flowChart)
+      const res = await getBot(botId)
+      const flowChart: FlowChart = JSON.parse(res.flowChart)
       setNodes((prev) => [
         ...prev,
         ...flowChart.map(
@@ -219,7 +217,7 @@ const ComponentsSideList: React.FC = () => {
           )
           .flat(1),
       ])
-      setName(res.data.name)
+      setName(res.name)
     })()
   }, [botId])
 
@@ -388,13 +386,11 @@ const ComponentsSideList: React.FC = () => {
         }
       })
 
-    const payload = {
-      name,
-      flowChart: JSON.stringify(flowchart),
-      developperId: user.id,
+    try {
+      await updateBot(botId, name, user.id, JSON.stringify(flowchart))
+    } catch {
+      showSnackBar("error", "エラーが発生しました")
     }
-
-    // NOTE: API呼び出し: PUT /bot/:botid
   }
 
   /**
@@ -421,13 +417,13 @@ const ComponentsSideList: React.FC = () => {
     try {
       const res = window.confirm("本当に削除しますか？")
       if (res) {
-        // NOTE: API呼び出し: DELETE /bot/:botid
+        await deleteBot(botId)
         router.push("/")
       }
     } catch {
       showSnackBar("error", "削除に失敗しました")
     }
-  }, [router, showSnackBar])
+  }, [botId, router, showSnackBar])
 
   const rootId = useId()
 

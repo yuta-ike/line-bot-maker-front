@@ -5,24 +5,36 @@ import Header from "../modules/Header"
 import { useUser } from "../provider/LiffProvider"
 import genId from "../components/utils/genId"
 import { useRouter } from "next/router"
+import { createBot, useBots } from "../services/api_service"
+import Link from "next/link"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
+export type FileComponentProps = {
+  botId: string
+  name: string
+  creatorName: string
+  creatorIconUrl: string
+}
 
-const FileComponent: React.FC = () => {
+const FileComponent: React.FC<FileComponentProps> = ({
+  botId,
+  name,
+  creatorName,
+  creatorIconUrl,
+}) => {
   return (
-    <div className="flex flex-col items-center">
-      <a href="https://ja.wikipedia.org/wiki/%E6%AF%9B%E5%88%A9%E5%B0%8F%E4%BA%94%E9%83%8E">
-        <BsFillFileCodeFill size={128} />
+    <Link href={`/bot/${botId}`}>
+      <a>
+        <div className="flex max-w-[240px] flex-col items-center">
+          <div className="flex w-full items-center justify-center rounded-lg bg-gray-300 py-10">
+            <BsFillFileCodeFill size={64} />
+          </div>
+          <div className="pb-1" />
+          <div className="flex w-full text-start text-lg">{name}</div>
+
+          <div className="pb-2" />
+        </div>
       </a>
-      <div className="pb-1" />
-      <a
-        href="https://ja.wikipedia.org/wiki/%E6%9C%8D%E9%83%A8%E5%B9%B3%E6%AC%A1"
-        className="rounded-lg bg-amber-200 text-xl"
-      >
-        せやかて工藤
-      </a>
-      <div className="pb-2" />
-    </div>
+    </Link>
   )
 }
 
@@ -32,6 +44,8 @@ const Home: NextPage = () => {
 
   const [searchInput, setSearchInput] = useState("")
 
+  const { data: bots } = useBots(user?.id)
+
   /**
    * 新しいBotの作成
    */
@@ -40,20 +54,14 @@ const Home: NextPage = () => {
       return
     }
     try {
-      const payload = {
-        bot_id: genId(),
-        name: "新しいプログラム",
-        flowChart: "[]",
-        developerId: user.id,
-      }
-      // NOTE: API呼び出し: POST /bot/:botid
-      router.push(`/bot/${payload.bot_id}`)
+      const botId = genId()
+      await createBot(botId, "新しいプログラム", "[]", user.id)
+
+      router.push(`/bot/${botId}`)
     } catch {
       window.alert("エラーが発生しました")
     }
   }, [router, user])
-
-  // NOTE: API呼び出し: GET /bot (SWR or useEffect)
 
   return (
     <div className="mt-20 bg-fixed p-4 font-mplus">
@@ -78,25 +86,26 @@ const Home: NextPage = () => {
               onChange={(e) => setSearchInput(e.target.value)}
             />
             <div className="w-4" />
-            <button className="container w-12 border border-black">検索</button>
+            <button
+              className="container w-12 border border-black"
+              onClick={() => window.alert("すみません、未実装です🚧")}
+            >
+              検索
+            </button>
           </div>
         </div>
       </form>
       <div className="mt-4 p-4">
         <div className="grid grid-cols-1 sm:grid-cols-5">
-          <div />
-          <FileComponent />
-          <FileComponent />
-          <FileComponent />
-          <div />
-          <div />
-          <FileComponent />
-          <FileComponent />
-          <FileComponent />
-          <div />
-          <div />
-          <FileComponent />
-          <div />
+          {bots?.map((bot: any) => (
+            <FileComponent
+              key={bot.fields.bot_id}
+              botId={bot.fields.bot_id}
+              name={bot.fields.name}
+              creatorName={user?.name ?? ""}
+              creatorIconUrl={user?.iconUrl ?? ""}
+            />
+          ))}
         </div>
       </div>
     </div>
