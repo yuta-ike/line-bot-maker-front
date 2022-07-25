@@ -7,6 +7,7 @@ import genId from "../components/utils/genId"
 import { useRouter } from "next/router"
 import { createBot, useBots } from "../services/api_service"
 import Link from "next/link"
+import Head from "next/head"
 
 export type FileComponentProps = {
   botId: string
@@ -55,7 +56,7 @@ const Home: NextPage = () => {
     }
     try {
       const botId = genId()
-      await createBot(botId, "新しいプログラム", "[]", user.id)
+      await createBot(botId, "新しいプログラム", user.id, "[]")
 
       router.push(`/bot/${botId}`)
     } catch {
@@ -64,51 +65,56 @@ const Home: NextPage = () => {
   }, [router, user])
 
   return (
-    <div className="mt-20 bg-fixed p-4 font-mplus">
-      <Header />
-      <div className="flex w-full justify-end">
-        <button
-          onClick={handleCreate}
-          className="rounded bg-green-500 p-4 text-white hover:bg-green-600"
-        >
-          新しいBotを作る
-        </button>
-      </div>
-      <form onSubmit={(e) => e.preventDefault()}>
-        <div className="flex flex-col items-center">
-          <div className="flex flex-row">
-            <input
-              className="container h-8 w-64 border border-gray-300 bg-gray-100 font-mplus"
-              type="text"
-              name="search"
-              placeholder="キーワードを入力"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-            <div className="w-4" />
-            <button
-              className="container w-12 border border-black"
-              onClick={() => window.alert("すみません、未実装です🚧")}
-            >
-              検索
-            </button>
+    <>
+      <Head>
+        <title>LINE Bot Maker</title>
+      </Head>
+      <div className="mt-20 bg-fixed p-4 font-mplus">
+        <Header />
+        <div className="flex w-full justify-end">
+          <button
+            onClick={handleCreate}
+            className="rounded bg-green-500 p-4 text-white hover:bg-green-600"
+          >
+            新しいBotを作る
+          </button>
+        </div>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <div className="flex flex-col items-center">
+            <div className="flex flex-row">
+              <input
+                className="container h-8 w-64 border border-gray-300 bg-gray-100 font-mplus"
+                type="text"
+                name="search"
+                placeholder="キーワードを入力"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <div className="w-4" />
+              <button
+                className="container w-12 border border-black"
+                onClick={() => window.alert("すみません、未実装です🚧")}
+              >
+                検索
+              </button>
+            </div>
+          </div>
+        </form>
+        <div className="mt-4 p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
+            {bots?.map((bot: any) => (
+              <FileComponent
+                key={bot.fields.bot_id}
+                botId={bot.fields.bot_id}
+                name={bot.fields.name}
+                creatorName={user?.name ?? ""}
+                creatorIconUrl={user?.iconUrl ?? ""}
+              />
+            ))}
           </div>
         </div>
-      </form>
-      <div className="mt-4 p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-5">
-          {bots?.map((bot: any) => (
-            <FileComponent
-              key={bot.fields.bot_id}
-              botId={bot.fields.bot_id}
-              name={bot.fields.name}
-              creatorName={user?.name ?? ""}
-              creatorIconUrl={user?.iconUrl ?? ""}
-            />
-          ))}
-        </div>
       </div>
-    </div>
+    </>
   )
 }
 

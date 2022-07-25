@@ -182,7 +182,6 @@ const stepFlowChart = (
 
   const nextNode = flowChart.find(({ id }) => id === nextNodeId) ?? null
   if (nextNode == null) {
-    console.log(flowChart.map(({ node }) => node.id))
     return {
       status: "failure",
       value,
