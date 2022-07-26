@@ -4,7 +4,7 @@ Front-end repository of "LINE Bot Maker" created by students in Kyoto University
 
 - [使ってみる](https://lbm.vercel.app/)
 - [発表資料](https://docs.google.com/presentation/d/1ppaFRecLssDuJEaxndWJUHQG2cfsEdfi/edit#slide=id.p1)
-- [バックエンド](https://github.com/xiaogeamadeus/linebot_backend2)
+- [バックエンドレポジトリ](https://github.com/xiaogeamadeus/linebot_backend2)
 
 ## 技術スタック
 
