@@ -1,3 +1,19 @@
+# LINE Bot Maker
+
+Front-end repository of "LINE Bot Maker" created by students in Kyoto University.
+
+## デプロイ先
+
+https://lbm.vercel.app/
+
+## 発表資料
+
+https://docs.google.com/presentation/d/1ppaFRecLssDuJEaxndWJUHQG2cfsEdfi/edit#slide=id.p1
+
+## 技術スタック
+
+React / TypeScript / Next.js / Tailwind.css / MUI / LIFF / LINE Login
+
 ## 開発
 
 ### 初回のみ
