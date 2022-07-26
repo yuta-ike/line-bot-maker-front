@@ -6,6 +6,10 @@ Front-end repository of "LINE Bot Maker" created by students in Kyoto University
 - [発表資料](https://docs.google.com/presentation/d/1ppaFRecLssDuJEaxndWJUHQG2cfsEdfi/edit#slide=id.p1)
 - [バックエンドレポジトリ](https://github.com/xiaogeamadeus/linebot_backend2)
 
+<p align="center">
+<img width="500px" style="margin: 0 auto;" alt="LINE Bot Maker's screenshot" src="https://user-images.githubusercontent.com/38308823/180981272-b9494e52-cbb4-460a-811b-d80ae3bfc818.png">
+</p>
+
 ## 技術スタック
 
 React / TypeScript / Next.js / Tailwind.css / MUI / LIFF / LINE Login
