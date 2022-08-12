@@ -1,6 +1,5 @@
 # ふろちゃでぼっと
 
-
 Front-end repository of "ふろちゃでぼっと" created by students in Kyoto University.
 
 - [使ってみる](https://lbm.vercel.app/)
