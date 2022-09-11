@@ -25,6 +25,11 @@ export async function getBot(id: string) {
   return res.data
 }
 
+export async function getOthersBot(id: string) {
+  const res = await axios.get(url + `/getIdToken/bot/others`, { params: { developerId: id } })
+  return res.data
+}
+
 export async function createBot(
   bot_id: string,
   name: string,
