@@ -16,15 +16,15 @@ const CorrespondCheckNode: React.FC<Props> = (props) => {
   }, [inputedText, node])
 
   return (
-    <div className="flex items-center w-full text-sm">
+    <div className="flex w-full items-center text-sm">
       <input
-        className="p-2 text-black rounded w-max focus:outline-none"
+        className="w-max rounded p-2 text-black focus:outline-none"
         placeholder="テキスト"
         value={inputedText}
         onChange={(e) => setInputedText(e.target.value)}
         onClick={(e) => e.preventDefault()}
       />
-      <p className="block ml-2 shrink-0">に</p>
+      <p className="ml-2 block shrink-0">に</p>
     </div>
   )
 }

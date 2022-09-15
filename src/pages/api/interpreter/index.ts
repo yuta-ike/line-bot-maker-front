@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import execFlowChart from "../../../interpreter"
+import execFlowChart, { OutputValue } from "../../../interpreter"
 import { FlowchartSyntaxError } from "../../../interpreter/error"
 import { FlowChart } from "../../../interpreter/type"
 
 type Content = {
-  reply: string
+  reply: OutputValue
 }
 
 const route = async (req: NextApiRequest, res: NextApiResponse<Content>) => {
@@ -13,9 +13,9 @@ const route = async (req: NextApiRequest, res: NextApiResponse<Content>) => {
     const message: string = req.body.message
 
     try {
-      const { value } = execFlowChart(flowchart, { message })
+      const { output } = execFlowChart(flowchart, { message })
 
-      res.status(200).json({ reply: value })
+      res.status(200).json({ reply: output })
     } catch (e) {
       if (e instanceof FlowchartSyntaxError) {
         res.status(400).end()

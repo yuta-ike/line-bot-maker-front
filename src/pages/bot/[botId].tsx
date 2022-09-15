@@ -12,6 +12,13 @@ import Head from "next/head"
 import FlowchartEditor from "../../components/editor/FlowchartEditor"
 
 const genInitNodes = () => {
+  const getHeightGenerator = function* () {
+    for (let i = 0; i < 100; i++) {
+      yield 40 + 125 * i
+    }
+  }
+  const getHeight = getHeightGenerator()
+
   return [
     new GraphNodeClass(
       {
@@ -22,7 +29,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 100,
+          y: getHeight.next().value as number,
         },
         inPoints: [],
         outPoints: [{ type: "number", label: "", limit: 1 }],
@@ -38,7 +45,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 225,
+          y: getHeight.next().value as number,
         },
         size: {
           width: 225,
@@ -61,7 +68,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 350,
+          y: getHeight.next().value as number,
         },
         size: {
           width: 225,
@@ -84,7 +91,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 475,
+          y: getHeight.next().value as number,
         },
         size: {
           width: 203,
@@ -97,6 +104,27 @@ const genInitNodes = () => {
     ),
     new GraphNodeClass(
       {
+        label: "スタンプを出力",
+        color: "#06c755",
+        nodeType: "stampOutputNode",
+      },
+      {
+        pos: {
+          x: 50,
+          y: getHeight.next().value as number,
+        },
+        size: {
+          width: 160,
+          height: 90,
+        },
+        inPoints: [{ type: "number", label: "", limit: null }],
+        outPoints: [],
+        isInitialNode: true,
+        createrInputValue: "ok",
+      },
+    ),
+    new GraphNodeClass(
+      {
         label: "天気予報",
         color: "#4169e1",
         nodeType: "weatherCheckNode",
@@ -104,7 +132,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 600,
+          y: getHeight.next().value as number,
         },
         inPoints: [{ type: "number", label: "", limit: null }],
         outPoints: [
@@ -124,7 +152,7 @@ const genInitNodes = () => {
       {
         pos: {
           x: 50,
-          y: 725,
+          y: getHeight.next().value as number,
         },
         inPoints: [{ type: "number", label: "", limit: null }],
         outPoints: [
@@ -342,7 +370,7 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <main className="flex-grow">
           <TopBar
             name={name}

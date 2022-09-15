@@ -1,4 +1,3 @@
-import { useRouter } from "next/router"
 import React, {
   Dispatch,
   SetStateAction,
@@ -180,12 +179,14 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
         mockValues,
       )
       return {
+        type: "success" as const,
         ...result,
         error: null,
       }
     } catch (e: unknown) {
       if (e instanceof InterpreterError) {
         return {
+          type: "failure" as const,
           value: null,
           stackTrace: e.stackTrace,
           error: e,
@@ -217,7 +218,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
           <div className="absolute inset-y-0 left-0 w-[360px] bg-gray-100" />
           <div
             id={rootId}
-            className="static flex-grow min-h-screen border border-blue-100 draggable-parent"
+            className="draggable-parent static min-h-screen flex-grow border border-blue-100"
             onClick={(e) => {
               // @ts-ignore
               if (e.target.id === rootId) {
@@ -240,7 +241,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                 )
                 return (
                   <div
-                    className="absolute top-0 left-0 w-full h-full"
+                    className="absolute top-0 left-0 h-full w-full"
                     key="temp"
                   >
                     <LineUI
@@ -321,7 +322,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                     node.isInitialNode ? "z-0" : "z-10",
                   )}
                   defaultClassNameDragging="group"
-                  onDrag={(_, data) =>
+                  onDrag={(_, data) => {
+                    setFocusItemId({
+                      type: "node",
+                      nodeId: node.id,
+                    })
                     setNodes((nodes) =>
                       nodes.map((n) =>
                         n.id !== node.id
@@ -332,7 +337,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                             }),
                       ),
                     )
-                  }
+                  }}
                   onStart={() => {
                     regenerateSampleNode(node)
                     setIsDragging(true)

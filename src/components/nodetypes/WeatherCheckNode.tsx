@@ -17,7 +17,7 @@ const WeatherCheckNode = () => {
       <select
         placeholder="選択してください"
         value={selectedPrefecture}
-        className="px-2 py-1 text-black rounded focus:outline-none"
+        className="rounded px-2 py-1 text-black focus:outline-none"
         onChange={(e) => setSelectdePrefecture(e.target.value)}
       >
         {options.map((option) => (

@@ -1,18 +1,23 @@
 import classNames from "classnames"
 import React, { Dispatch, SetStateAction, useMemo } from "react"
 import { FiAlertCircle } from "react-icons/fi"
+import { OutputValue } from "../../interpreter"
 import { InterpreterError } from "../../interpreter/error"
 import { StackTrace } from "../../interpreter/type"
+import { STAMP_OPTIONS } from "../nodetypes/StampOutputNode"
 import { GraphNodeClass } from "./node"
 
 export type SidebarProps = {
   result:
     | {
+        type: "success"
         error: null
         value: string
+        output: OutputValue
         stackTrace: StackTrace
       }
     | {
+        type: "failure"
         value: null
         stackTrace: StackTrace | null
         error: InterpreterError
@@ -114,15 +119,25 @@ const Sidebar: React.FC<SidebarProps> = ({
       ))}
       <div className="!mt-6">
         <div className="text-sm text-gray-500">出力</div>
-        <input
-          className={classNames(
-            "max-w-[203px] rounded border border-[#efefef] bg-gray-100 px-3 py-2 focus:outline-none",
-            (result == null || result?.value === "") && "text-gray-300",
-          )}
-          value={result?.value || "<値なし>"}
-          disabled
-          placeholder="出力"
-        />
+        <div className="flex w-full max-w-[203px] items-center">
+          <div className="shrink-0 text-sm">スタンプ： </div>
+          <input
+            className={classNames(
+              "w-full rounded border border-[#efefef] bg-gray-100 px-3 py-2 focus:outline-none",
+              (result == null || result?.value === "") && "text-gray-300",
+            )}
+            value={
+              result.type === "success"
+                ? result.output.type === "stamp"
+                  ? // @ts-ignore
+                    STAMP_OPTIONS[result.output.value]
+                  : result.output.value
+                : "値なし"
+            }
+            disabled
+            placeholder="出力"
+          />
+        </div>
       </div>
       {result.error?.message != null && (
         <div className="flex items-center space-x-1 text-sm text-red-500">
