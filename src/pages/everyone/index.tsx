@@ -1,22 +1,24 @@
 import type { NextPage } from "next"
 import { useCallback, useMemo, useState } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
-import Header from "../modules/Header"
-import { useUser } from "../provider/LiffProvider"
-import genId from "../components/utils/genId"
+import { HiArrowRight } from "react-icons/hi"
+import { TiHeartOutline } from "react-icons/ti"
+import Header from "../../modules/Header"
+import { useUser } from "../../provider/LiffProvider"
+import genId from "../../components/utils/genId"
 import { useRouter } from "next/router"
-import { createBot, useBots } from "../services/api_service"
+import { createBot, useBots } from "../../services/api_service"
 import Link from "next/link"
 import Head from "next/head"
 import { FiSearch } from "react-icons/fi"
-import Image from "next/image"
-import { searchText } from "../components/utils/search"
+import { searchText } from "../../components/utils/search"
 
 export type FileComponentProps = {
   botId: string
   name: string
   creatorName: string
   creatorIconUrl: string
+  good: number
 }
 
 const FileComponent: React.FC<FileComponentProps> = ({
@@ -26,23 +28,14 @@ const FileComponent: React.FC<FileComponentProps> = ({
   creatorIconUrl,
 }) => {
   return (
-    <Link href={`/bot/${botId}`}>
-      <a className="flex w-full flex-col items-center">
-        <div className="flex w-full items-center justify-center rounded-lg bg-gray-300 py-10">
-          <BsFillFileCodeFill size={64} />
-        </div>
-        <div className="my-1 flex w-full space-x-4 text-start text-lg">
-          {/* <Image
-              src={creatorIconUrl}
-              width={32}
-              height={32}
-              alt=""
-              className="rounded-full"
-            /> */}
-          <span>{name}</span>
-        </div>
-      </a>
-    </Link>
+    <div className="flex w-full flex-col items-center">
+      <div className="flex w-full items-center justify-center rounded-lg bg-gray-300 py-4">
+        <HiArrowRight size={64} />
+      </div>
+      <div className="pb-1" />
+      <div className="flex w-full text-start text-lg font-bold">{name}</div>
+      <div className="pb-2" />
+    </div>
   )
 }
 
@@ -52,13 +45,13 @@ const Home: NextPage = () => {
 
   const [searchInput, setSearchInput] = useState("")
 
-  const { data: bots } = useBots({ me: true })
+  const { data: bots } = useBots()
 
   /**
    * 新しいBotの作成
    */
   const handleCreate = useCallback(async () => {
-    if (user == null) {
+    if (user?.idToken == null) {
       return
     }
     try {
@@ -110,15 +103,34 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="mt-4 p-4">
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mx-auto grid max-w-4xl gap-12 md:grid-cols-2">
             {filteredBot?.map((bot: any) => (
-              <FileComponent
-                key={bot.bot_id}
-                botId={bot.bot_id}
-                name={bot.name}
-                creatorName={bot.created_by.name}
-                creatorIconUrl={bot.created_by.picture}
-              />
+              <div className="flex w-full flex-col" key={bot.bot_id}>
+                <FileComponent
+                  key={bot.bot_id}
+                  botId={bot.bot_id}
+                  name={bot.name}
+                  creatorName={bot.created_by.name}
+                  creatorIconUrl={bot.created_by.picture}
+                  good={2}
+                />
+                <div>「天気は？」と聞くと、明日の天気を教えてくれます！</div>
+                <div className="flex-raw flex flex-wrap items-center">
+                  <button className="mt-3 mr-3 flex items-center rounded-full bg-gray-200 px-3 py-1 transition hover:bg-gray-300">
+                    <TiHeartOutline size={24} />
+                    <span className="ml-1 font-bold">0</span>
+                  </button>
+                  <button className="mt-3 mr-3 rounded-full bg-gray-200 px-6 py-1 font-semibold text-black transition hover:bg-gray-300">
+                    プログラムを見る
+                  </button>
+                  <button
+                    className="mt-3 mr-3 rounded-full bg-red-200 px-6 py-1 font-semibold text-black transition hover:bg-red-300"
+                    onClick={handleCreate}
+                  >
+                    使ってみる
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>

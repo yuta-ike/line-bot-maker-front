@@ -9,6 +9,7 @@ import { createTheme } from "@mui/material/styles"
 import { css } from "@mui/styled-engine"
 import { ThemeProvider } from "@mui/material/styles"
 import { useLiffOperation, useUser } from "../provider/LiffProvider"
+import Link from "next/link"
 
 const classes = {
   root: {
@@ -28,9 +29,6 @@ const classes = {
   },
   menuButton: {
     marginRight: 8,
-  },
-  title: {
-    flexGrow: 1,
   },
 } as const
 
@@ -56,21 +54,20 @@ const Header: React.FC = () => {
       <div css={css(classes.root)}>
         <AppBar css={css(classes.appbar)} position="static" color="primary">
           <Toolbar>
-            {/* <IconButton
-              edge="start"
-              css={css(classes.menuButton)}
-              style={{ color: "#f8faf7" }}
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </IconButton> */}
-            <Typography
-              variant="h6"
-              css={css(classes.title)}
-              style={{ color: "#f8faf7", fontFamily: "M PLUS Rounded 1c" }}
-            >
-              Line Bot Maker
-            </Typography>
+            <div className="flex flex-grow items-center space-x-8">
+              <h1
+                className="font-bold"
+                style={{ color: "#f8faf7", fontFamily: "'M PLUS Rounded 1c'" }}
+              >
+                ふろちゃでぼっと
+              </h1>
+              <Link href="/">
+                <a className="text-white hover:underline">Bot一覧</a>
+              </Link>
+              <Link href="/everyone">
+                <a className="text-white hover:underline">みんなのBot</a>
+              </Link>
+            </div>
             {user != null ? (
               <div className="relative">
                 <IconButton

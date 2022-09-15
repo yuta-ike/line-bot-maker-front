@@ -4,9 +4,16 @@ import { MdHome } from "react-icons/md"
 export type TopBarProps = {
   name: string
   onChangeName: (name: string) => void
+  isPublic: boolean
+  onChangeIsPublic: (isPublic: boolean) => void
 }
 
-const TopBar: React.FC<TopBarProps> = ({ name, onChangeName }) => {
+const TopBar: React.FC<TopBarProps> = ({
+  name,
+  onChangeName,
+  isPublic,
+  onChangeIsPublic,
+}) => {
   return (
     <>
       <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
@@ -24,6 +31,11 @@ const TopBar: React.FC<TopBarProps> = ({ name, onChangeName }) => {
             onChangeName(e.target.value)
           }}
         />
+        <div className="ml-auto">
+          <button onClick={() => onChangeIsPublic(!isPublic)}>
+            {isPublic ? "公開中" : "非公開"}
+          </button>
+        </div>
       </div>
     </>
   )
