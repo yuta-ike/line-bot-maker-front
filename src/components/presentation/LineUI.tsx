@@ -8,12 +8,14 @@ export type LineUIProps = {
   isFocused?: boolean
   onFocus?: () => void
   onDelete?: () => void
+  isHighlighted?: boolean
 }
 
 const LineUI: React.FC<LineUIProps> = ({
   startPos,
   delta,
   isFocused = false,
+  isHighlighted = false,
   onFocus,
   onDelete,
 }) => {
@@ -57,6 +59,8 @@ const LineUI: React.FC<LineUIProps> = ({
             "pointer-events-none transition-[stroke,stroke-width]",
             isFocused
               ? "stroke-red-400 stroke-[6px] drop-shadow-2xl"
+              : isHighlighted
+              ? "stroke-pink-500 stroke-[6px] drop-shadow-2xl"
               : "stroke-gray-500 stroke-[4px]",
           )}
         />

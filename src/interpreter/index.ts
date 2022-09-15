@@ -38,18 +38,18 @@ const execFlowChart = (
   }
 
   // validation: output node
-  const outputNodeIds = Array.from(
-    new Set(flowChart.map(({ outputs }) => outputs).flat(1)),
-  )
-  outputNodeIds.forEach((nodeId) => {
-    const node = flowChart.find(({ id }) => id === nodeId)
-    if (node == null) {
-      throw new InternalError(
-        "NODE_NOT_FOUND",
-        `node id (${nodeId}) が見つかりません`,
-      )
-    }
-  })
+  // const outputNodeIds = Array.from(
+  //   new Set(flowChart.map(({ outputs }) => outputs).flat(1)),
+  // )
+  // outputNodeIds.forEach((nodeId) => {
+  //   const node = flowChart.find(({ id }) => id === nodeId)
+  //   if (node == null) {
+  //     throw new InternalError(
+  //       "NODE_NOT_FOUND",
+  //       `繋がっていないノードがあります`,
+  //     )
+  //   }
+  // })
 
   const stackTrace: StackTrace = []
 

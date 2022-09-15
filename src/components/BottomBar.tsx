@@ -99,13 +99,13 @@ const BottomBar: React.FC<BottomBarProps> = ({
       <div className="fixed inset-x-0 bottom-0 flex justify-between">
         <div>
           <button
-            className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="w-20 h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleDelete}
           >
             削除
           </button>
           <button
-            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleReset}
           >
             リセット
@@ -113,13 +113,13 @@ const BottomBar: React.FC<BottomBarProps> = ({
         </div>
         <div className="flex">
           <button
-            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleSave}
           >
             保存
           </button>
           <button
-            className="m-4 h-12 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-red-300 rounded shadow-md"
             onClick={openModal}
           >
             保存して公開
@@ -132,36 +132,36 @@ const BottomBar: React.FC<BottomBarProps> = ({
             onAfterOpen={afterOpenModal}
             // モーダルを閉じる処理を定義
             onRequestClose={closeModal}
+            overlayClassName="z-50 fixed inset-0 bg-black/40"
           >
-            <h1>Botを保存しました！！</h1>
-            {/* <button
-              className="mr-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-              onClick={closeModal}
-            >
-              とじる
-            </button> */}
-            <div className="flex w-full justify-center py-4">
-              <Image
-                src={qrImage}
-                alt=""
-                width="120px"
-                height="120px"
-                className="mx-auto"
-              />
-            </div>
-            <div>
-              <button
-                className="ml-4 mt-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
-                onClick={handleCopyUrl}
-              >
-                共有URLをコピー
-              </button>
-              <button
-                className="ml-4 mt-4 h-12 w-40 rounded bg-red-300 p-4 text-center leading-none shadow-md"
-                onClick={shareLink}
-              >
-                友達にシェアする
-              </button>
+            <div className="mx-auto w-[540px] max-w-[80%]">
+              <h1 className="mb-4 text-xl">Botを保存しました！</h1>
+              <p>
+                QRコードをスマートフォンで読み取るか、「共有URLのシェア」、「LINEのシェア」のいずれかで利用してみましょう
+              </p>
+              <div className="flex justify-center w-full py-4">
+                <Image
+                  src={qrImage}
+                  alt=""
+                  width="120px"
+                  height="120px"
+                  className="mx-auto"
+                />
+              </div>
+              <div className="flex w-full">
+                <button
+                  className="flex-1 h-12 p-4 mt-4 ml-4 leading-none text-center bg-gray-300 rounded shadow-md"
+                  onClick={handleCopyUrl}
+                >
+                  共有URLをコピー
+                </button>
+                <button
+                  className="flex-1 w-40 h-12 p-4 mt-4 ml-4 leading-none text-center bg-red-300 rounded shadow-md"
+                  onClick={shareLink}
+                >
+                  LINEにシェアする
+                </button>
+              </div>
             </div>
           </Modal>
         </div>

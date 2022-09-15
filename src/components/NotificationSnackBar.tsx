@@ -86,7 +86,7 @@ const NotificationSnackBar: React.FC<NotificationSnackBarProps> = ({
   return (
     <div
       className={classNames(
-        "fixed left-1/2 flex w-[400px] max-w-full -translate-x-1/2 items-center justify-between rounded border-2 p-4 text-gray-800 shadow transition-[top,transition] duration-300",
+        "fixed left-1/2 z-50 flex w-[400px] max-w-full -translate-x-1/2 items-center justify-between rounded border-2 p-4 text-gray-800 shadow transition-[top,transition] duration-300",
         type === "error"
           ? "border-red-300 bg-red-100"
           : "border-emerald-500/60 bg-emerald-100",

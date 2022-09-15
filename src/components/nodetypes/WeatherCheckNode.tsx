@@ -12,12 +12,12 @@ const WeatherCheckNode = () => {
   ]
 
   return (
-    <div className="flex space-x-2">
-      <div className="">天気予報</div>
+    <div className="flex items-center space-x-2 text-sm">
+      <p>天気予報</p>
       <select
         placeholder="選択してください"
         value={selectedPrefecture}
-        className="rounded px-2 py-1 text-xs text-black"
+        className="px-2 py-1 text-black rounded focus:outline-none"
         onChange={(e) => setSelectdePrefecture(e.target.value)}
       >
         {options.map((option) => (

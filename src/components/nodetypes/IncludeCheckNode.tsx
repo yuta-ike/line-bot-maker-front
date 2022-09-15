@@ -13,16 +13,15 @@ const IncludeCheckNode: React.FC<Props> = (props) => {
   }, [inputedText, node])
 
   return (
-    <div className="flex">
-      <div className="text-black">
-        <textarea
-          value={inputedText}
-          onChange={(e) => setInputedText(e.target.value)}
-          cols={5}
-          rows={1}
-        />
-      </div>
-      <div>を含むか</div>
+    <div className="flex w-full items-center text-sm">
+      <input
+        className="w-max rounded p-2 text-black focus:outline-none"
+        placeholder="テキスト"
+        value={inputedText}
+        onChange={(e) => setInputedText(e.target.value)}
+        onClick={(e) => e.preventDefault()}
+      />
+      <p className="ml-2 block shrink-0">を</p>
     </div>
   )
 }

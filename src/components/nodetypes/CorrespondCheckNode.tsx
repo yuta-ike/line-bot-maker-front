@@ -16,16 +16,15 @@ const CorrespondCheckNode: React.FC<Props> = (props) => {
   }, [inputedText, node])
 
   return (
-    <div className="flex">
-      <div className="text-black">
-        <textarea
-          value={inputedText}
-          onChange={(e) => setInputedText(e.target.value)}
-          cols={5}
-          rows={1}
-        />
-      </div>
-      <div>に一致するか</div>
+    <div className="flex items-center w-full text-sm">
+      <input
+        className="p-2 text-black rounded w-max focus:outline-none"
+        placeholder="テキスト"
+        value={inputedText}
+        onChange={(e) => setInputedText(e.target.value)}
+        onClick={(e) => e.preventDefault()}
+      />
+      <p className="block ml-2 shrink-0">に</p>
     </div>
   )
 }
