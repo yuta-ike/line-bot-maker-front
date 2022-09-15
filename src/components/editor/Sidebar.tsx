@@ -120,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="!mt-6">
         <div className="text-sm text-gray-500">出力</div>
         <div className="flex w-full max-w-[203px] items-center">
-          <div className="text-sm shrink-0">スタンプ： </div>
+          <div className="shrink-0 text-sm">スタンプ： </div>
           <input
             className={classNames(
               "w-full rounded border border-[#efefef] bg-gray-100 px-3 py-2 focus:outline-none",

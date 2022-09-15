@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import execFlowChart from "../../../interpreter"
+import execFlowChart, { OutputValue } from "../../../interpreter"
 import { FlowchartSyntaxError } from "../../../interpreter/error"
 import { FlowChart } from "../../../interpreter/type"
 
 type Content = {
-  reply: string
+  reply: OutputValue
 }
 
 const route = async (req: NextApiRequest, res: NextApiResponse<Content>) => {

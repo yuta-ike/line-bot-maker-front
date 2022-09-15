@@ -370,7 +370,7 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <main className="flex-grow">
           <TopBar
             name={name}

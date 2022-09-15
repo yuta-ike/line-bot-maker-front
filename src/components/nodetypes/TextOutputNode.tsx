@@ -16,15 +16,15 @@ const TextOutputNode: React.FC<Props> = (props) => {
   }, [inputedText, node])
 
   return (
-    <div className="flex flex-col items-start w-full text-sm">
+    <div className="flex w-full flex-col items-start text-sm">
       <input
-        className="p-2 text-black rounded w-max focus:outline-none"
+        className="w-max rounded p-2 text-black focus:outline-none"
         placeholder="テキスト"
         value={inputedText}
         onChange={(e) => setInputedText(e.target.value)}
         onClick={(e) => e.preventDefault()}
       />
-      <p className="block mt-2 shrink-0">と出力</p>
+      <p className="mt-2 block shrink-0">と出力</p>
     </div>
   )
 }

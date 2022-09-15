@@ -25,9 +25,9 @@ const StampOutputNode: React.FC<Props> = (props) => {
   }, [inputedText, node])
 
   return (
-    <div className="flex flex-col items-start w-full text-sm">
+    <div className="flex w-full flex-col items-start text-sm">
       <select
-        className="w-full p-2 text-black rounded focus:outline-none"
+        className="w-full rounded p-2 text-black focus:outline-none"
         placeholder="スタンプコード"
         value={inputedText}
         onChange={(e) => setInputedText(e.target.value)}
@@ -40,7 +40,7 @@ const StampOutputNode: React.FC<Props> = (props) => {
         <option value="stargazing">{STAMP_OPTIONS["stargazing"]}</option>
         <option value="sad">{STAMP_OPTIONS["sad"]}</option>
       </select>
-      <p className="block mt-2 shrink-0">のスタンプを送信</p>
+      <p className="mt-2 block shrink-0">のスタンプを送信</p>
     </div>
   )
 }
