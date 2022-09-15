@@ -9,6 +9,7 @@ import { createTheme } from "@mui/material/styles"
 import { css } from "@mui/styled-engine"
 import { ThemeProvider } from "@mui/material/styles"
 import { useLiffOperation, useUser } from "../provider/LiffProvider"
+import Link from "next/link"
 
 const classes = {
   root: {
@@ -28,9 +29,6 @@ const classes = {
   },
   menuButton: {
     marginRight: 8,
-  },
-  title: {
-    flexGrow: 1,
   },
 } as const
 
@@ -56,21 +54,20 @@ const Header: React.FC = () => {
       <div css={css(classes.root)}>
         <AppBar css={css(classes.appbar)} position="static" color="primary">
           <Toolbar>
-            {/* <IconButton
-              edge="start"
-              css={css(classes.menuButton)}
-              style={{ color: "#f8faf7" }}
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </IconButton> */}
-            <Typography
-              variant="h6"
-              css={css(classes.title)}
-              style={{ color: "#f8faf7", fontFamily: "M PLUS Rounded 1c" }}
-            >
-              Line Bot Maker
-            </Typography>
+            <div className="flex items-center flex-grow space-x-8">
+              <h1
+                className="font-bold"
+                style={{ color: "#f8faf7", fontFamily: "'M PLUS Rounded 1c'" }}
+              >
+                ふろちゃでぼっと
+              </h1>
+              <Link href="/">
+                <a className="text-white hover:underline">Bot一覧</a>
+              </Link>
+              <Link href="/everyone">
+                <a className="text-white hover:underline">みんなのBot</a>
+              </Link>
+            </div>
             {user != null ? (
               <div className="relative">
                 <IconButton
@@ -90,8 +87,8 @@ const Header: React.FC = () => {
                 </IconButton>
                 {showPopover && (
                   <div className="absolute top-full right-0 w-[240px] flex-col rounded bg-white shadow-md">
-                    <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
-                      <div className="h-8 w-8 shrink-0">
+                    <div className="flex items-center px-4 py-4 space-x-2 border-b border-gray-200">
+                      <div className="w-8 h-8 shrink-0">
                         <Image
                           src={user.iconUrl ?? ""}
                           css={css(classes.iconimage)}
@@ -120,7 +117,7 @@ const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => login()}
-                className="rounded border-2 border-white px-4 py-2 text-white"
+                className="px-4 py-2 text-white border-2 border-white rounded"
               >
                 ログイン
               </button>

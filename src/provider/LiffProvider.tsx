@@ -7,13 +7,16 @@ import React, {
 } from "react"
 import type { Liff } from "@line/liff"
 import { useRouter } from "next/router"
+import { postLogin } from "../services/api_service"
 
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID!
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID as string
+console.log(LIFF_ID)
 
 export type User = {
   id: string
   name: string
   iconUrl: string | null
+  idToken: string | null
 }
 
 export type LiffContextType = { liff: Liff | null; user: User | null }
@@ -41,10 +44,18 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
   const router = useRouter()
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
     ;(async () => {
       const { default: liff } = await import("@line/liff")
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: false })
+      await liff.ready
       setValue({ liff, user: null })
+      const idToken = liff.getIDToken()
+      if (idToken != null) {
+        await postLogin(idToken)
+      }
       const profile = await liff.getProfile()
       setValue((prev) => ({
         ...prev,
@@ -52,30 +63,39 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
           id: profile.userId,
           name: profile.displayName,
           iconUrl: profile.pictureUrl ?? null,
+          idToken,
         },
       }))
     })().catch((e) => console.error(e))
-  }, [router])
+  }, [])
 
   const login = useCallback(
-    async (redirectUri?: string) => {
+    async (redirectUri?: string, forceLogin?: boolean) => {
       const liff = value.liff
       if (liff == null) {
-        // throw new Error("Liff is not initialized")
         return
       }
-      if (!liff.isLoggedIn()) {
+      if (forceLogin || !liff.isLoggedIn()) {
         liff.login({
           redirectUri,
         })
       }
       const profile = await liff.getProfile()
+      const idToken = liff.getIDToken()
+      if (idToken != null) {
+        await postLogin(idToken).catch((e) => {
+          if (e.response.status === 403) {
+            console.log("error")
+          }
+        })
+      }
       setValue((prev) => ({
         ...prev,
         user: {
           id: profile.userId,
           name: profile.displayName,
           iconUrl: profile.pictureUrl ?? null,
+          idToken,
         },
       }))
     },

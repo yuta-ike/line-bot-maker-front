@@ -1,5 +1,5 @@
 import type { NextPage } from "next"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { BsFillFileCodeFill } from "react-icons/bs"
 import Header from "../modules/Header"
 import { useUser } from "../provider/LiffProvider"
@@ -8,6 +8,9 @@ import { useRouter } from "next/router"
 import { createBot, useBots } from "../services/api_service"
 import Link from "next/link"
 import Head from "next/head"
+import { FiSearch } from "react-icons/fi"
+import Image from "next/image"
+import { searchText } from "../components/utils/search"
 
 export type FileComponentProps = {
   botId: string
@@ -24,15 +27,19 @@ const FileComponent: React.FC<FileComponentProps> = ({
 }) => {
   return (
     <Link href={`/bot/${botId}`}>
-      <a>
-        <div className="flex max-w-[240px] flex-col items-center">
-          <div className="flex w-full items-center justify-center rounded-lg bg-gray-300 py-10">
-            <BsFillFileCodeFill size={64} />
-          </div>
-          <div className="pb-1" />
-          <div className="flex w-full text-start text-lg">{name}</div>
-
-          <div className="pb-2" />
+      <a className="flex flex-col items-center w-full">
+        <div className="flex items-center justify-center w-full py-10 bg-gray-300 rounded-lg">
+          <BsFillFileCodeFill size={64} />
+        </div>
+        <div className="flex w-full my-1 space-x-4 text-lg text-start">
+          {/* <Image
+              src={creatorIconUrl}
+              width={32}
+              height={32}
+              alt=""
+              className="rounded-full"
+            /> */}
+          <span>{name}</span>
         </div>
       </a>
     </Link>
@@ -45,7 +52,7 @@ const Home: NextPage = () => {
 
   const [searchInput, setSearchInput] = useState("")
 
-  const { data: bots } = useBots(user?.id)
+  const { data: bots } = useBots({ me: true })
 
   /**
    * 新しいBotの作成
@@ -56,7 +63,7 @@ const Home: NextPage = () => {
     }
     try {
       const botId = genId()
-      await createBot(botId, "新しいプログラム", user.id, "[]")
+      await createBot(user.idToken, botId, "新しいプログラム", "[]")
 
       router.push(`/bot/${botId}`)
     } catch {
@@ -64,51 +71,53 @@ const Home: NextPage = () => {
     }
   }, [router, user])
 
+  const filteredBot = useMemo(() => {
+    if (searchInput.length === 0) {
+      return bots
+    }
+    return searchText(bots, ["name"], searchInput)
+  }, [bots, searchInput])
+
   return (
     <>
       <Head>
         <title>LINE Bot Maker</title>
       </Head>
-      <div className="mt-20 bg-fixed p-4 font-mplus">
+      <div className="p-4 mt-20 bg-fixed font-mplus">
         <Header />
-        <div className="flex w-full justify-end">
+        <div className="flex justify-end w-full">
           <button
             onClick={handleCreate}
-            className="rounded bg-green-500 p-4 text-white hover:bg-green-600"
+            className="p-4 text-white bg-green-500 rounded hover:bg-green-600"
           >
             新しいBotを作る
           </button>
         </div>
-        <form onSubmit={(e) => e.preventDefault()}>
-          <div className="flex flex-col items-center">
-            <div className="flex flex-row">
-              <input
-                className="container h-8 w-64 border border-gray-300 bg-gray-100 font-mplus"
-                type="text"
-                name="search"
-                placeholder="キーワードを入力"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-              <div className="w-4" />
-              <button
-                className="container w-12 border border-black"
-                onClick={() => window.alert("すみません、未実装です🚧")}
-              >
-                検索
-              </button>
-            </div>
+        <div className="flex flex-col items-center">
+          <div className="relative flex flex-row">
+            <FiSearch
+              size={24}
+              className="absolute text-gray-400 -translate-y-1/2 top-1/2 left-4"
+            />
+            <input
+              className="container h-8 py-6 pl-12 pr-8 bg-gray-100 border border-gray-300 border-none rounded-full w-72 font-mplus hover:bg-gray-200 focus:bg-gray-200 focus:outline-none"
+              type="text"
+              name="search"
+              placeholder="キーワードを入力"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
           </div>
-        </form>
-        <div className="mt-4 p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-            {bots?.map((bot: any) => (
+        </div>
+        <div className="p-4 mt-4">
+          <div className="grid max-w-4xl grid-cols-1 gap-4 mx-auto sm:grid-cols-3 md:grid-cols-4">
+            {filteredBot?.map((bot: any) => (
               <FileComponent
-                key={bot.fields.bot_id}
-                botId={bot.fields.bot_id}
-                name={bot.fields.name}
-                creatorName={user?.name ?? ""}
-                creatorIconUrl={user?.iconUrl ?? ""}
+                key={bot.bot_id}
+                botId={bot.bot_id}
+                name={bot.name}
+                creatorName={bot.created_by.name}
+                creatorIconUrl={bot.created_by.picture}
               />
             ))}
           </div>

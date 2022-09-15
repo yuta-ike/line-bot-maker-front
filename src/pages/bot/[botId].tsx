@@ -177,12 +177,13 @@ const unwrapId = (id: string): string => {
 
 const ComponentsSideList: React.FC = () => {
   const router = useRouter()
-  const botId = router.query.botId as string
+  const botId = router.query.botId as string | undefined
   const user = useUser()
   const liff = useLiff()
   const showSnackBar = useSnackBar()
 
   const [name, setName] = useState("")
+  const [isPublic, setIsPublic] = useState(false)
   //nodeとedgeの状態管理
   const [nodes, setNodes] = useState<GraphNodeClass[]>(() => genInitNodes())
   const [edges, setEdges] = useState<Edge[]>([])
@@ -209,12 +210,12 @@ const ComponentsSideList: React.FC = () => {
    * データベースから初期位置となるフローチャートを取得
    */
   useEffect(() => {
-    if (botId == null) {
+    if (botId == null || user?.idToken == null || botId == null) {
       return
     }
     ;(async () => {
-      const res = await getBot(botId)
-      const flowChart: FlowChart = JSON.parse(res.flowChart)
+      const res = await getBot(user.idToken, botId)
+      const flowChart: FlowChart = JSON.parse(res.flowchart)
       setNodes((prev) => [
         ...prev,
         ...flowChart.map(
@@ -247,8 +248,49 @@ const ComponentsSideList: React.FC = () => {
           .flat(1),
       ])
       setName(res.name)
+      setIsPublic(res.is_public)
     })()
-  }, [botId])
+  }, [botId, user?.idToken])
+
+  const onChangeIsPublic = async (value: boolean) => {
+    if (user?.idToken == null || botId == null) {
+      return
+    }
+    const flowchart = nodes
+      .filter(({ isInitialNode }) => !isInitialNode)
+      .map((node) => {
+        const relatedEdges = edges.filter(
+          ({ start }) => start.nodeId === node.id,
+        )
+        return {
+          id: node.id,
+          node: {
+            ...node,
+            type: node.node.nodeType as
+              | "textInputNode"
+              | "correspondCheckNode"
+              | "textOutputNode"
+              | "nop",
+            createrInputValue: node.createrInputValue,
+          },
+          outputs: relatedEdges.map(({ end }) => end.nodeId),
+        }
+      })
+
+    try {
+      await updateBot(
+        user.idToken,
+        botId,
+        name,
+        user.id,
+        JSON.stringify(flowchart),
+        value,
+      )
+      setIsPublic(value)
+    } catch {
+      showSnackBar("error", "エラーが発生しました")
+    }
+  }
 
   //初期のnodeがドラッグされると初期位置に新たなnodeを追加する
   //ドラッグされたnodeを受け取り，それが初期位置にあったnodeなら初期位置に同じnodeを追加
@@ -395,7 +437,7 @@ const ComponentsSideList: React.FC = () => {
    * フローチャートの保存処理
    */
   const handleSave = async () => {
-    if (user == null) {
+    if (user == null || botId == null) {
       window.alert("保存に失敗しました")
       return
     }
@@ -421,7 +463,14 @@ const ComponentsSideList: React.FC = () => {
       })
 
     try {
-      await updateBot(botId, name, user.id, JSON.stringify(flowchart))
+      await updateBot(
+        user.idToken,
+        botId,
+        name,
+        user.id,
+        JSON.stringify(flowchart),
+        isPublic,
+      )
     } catch {
       showSnackBar("error", "エラーが発生しました")
     }
@@ -431,6 +480,9 @@ const ComponentsSideList: React.FC = () => {
    * フローチャートのLINE共有処理
    */
   const handleShare = useCallback(async () => {
+    if (botId == null) {
+      return
+    }
     try {
       await liff!.shareTargetPicker([
         buildInviteMessage({
@@ -448,16 +500,19 @@ const ComponentsSideList: React.FC = () => {
    * フローチャートの削除処理
    */
   const handleDeleteBot = useCallback(async () => {
+    if (botId == null) {
+      return
+    }
     try {
       const res = window.confirm("本当に削除しますか？")
       if (res) {
-        await deleteBot(botId)
+        await deleteBot(user?.idToken ?? null, botId)
         router.push("/")
       }
     } catch {
       showSnackBar("error", "削除に失敗しました")
     }
-  }, [botId, router, showSnackBar])
+  }, [botId, router, showSnackBar, user?.idToken])
 
   const effectInputs = useMemo(
     () =>
@@ -490,9 +545,14 @@ const ComponentsSideList: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
-          <TopBar name={name} onChangeName={setName} />
+          <TopBar
+            name={name}
+            onChangeName={setName}
+            isPublic={isPublic}
+            onChangeIsPublic={onChangeIsPublic}
+          />
           <div id="concept">
             {/* 枠線の指定 */}
             <div className="flex">
@@ -594,7 +654,7 @@ const ComponentsSideList: React.FC = () => {
               </div>
               <div
                 id={rootId}
-                className="draggable-parent static min-h-screen flex-grow border border-blue-100"
+                className="static flex-grow min-h-screen border border-blue-100 draggable-parent"
                 onClick={(e) => {
                   // @ts-ignore
                   if (e.target.id === rootId) {
@@ -618,7 +678,7 @@ const ComponentsSideList: React.FC = () => {
                     )
                     return (
                       <div
-                        className="absolute top-0 left-0 h-full w-full"
+                        className="absolute top-0 left-0 w-full h-full"
                         key="temp"
                       >
                         <LineUI
@@ -719,7 +779,7 @@ const ComponentsSideList: React.FC = () => {
                           )}
                         >
                           <button
-                            className="flex w-max items-center space-x-1 rounded bg-blue-400 px-2 py-1 text-sm text-white"
+                            className="flex items-center px-2 py-1 space-x-1 text-sm text-white bg-blue-400 rounded w-max"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDuplicate(node)
@@ -729,7 +789,7 @@ const ComponentsSideList: React.FC = () => {
                             <span>コピー</span>
                           </button>
                           <button
-                            className="flex w-max items-center space-x-1 rounded bg-red-400 px-2 py-1 text-sm text-white"
+                            className="flex items-center px-2 py-1 space-x-1 text-sm text-white bg-red-400 rounded w-max"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDelete(node)
@@ -804,7 +864,7 @@ const ComponentsSideList: React.FC = () => {
                                     )}
                                   />
                                   {/* inputの文字 */}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+                                  <div className="absolute text-sm leading-none text-white -translate-x-1/2 top-full left-1/2">
                                     {point.label}
                                   </div>
                                 </button>
@@ -850,7 +910,7 @@ const ComponentsSideList: React.FC = () => {
                         {(node.node.nodeType === "weatherCheckNode" ||
                           node.node.nodeType === "randomNode") &&
                           !node.isInitialNode && (
-                            <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
+                            <div className="absolute text-xs font-bold text-white top-2 left-2 tabular-nums">
                               #{unwrapId(node.id)}
                             </div>
                           )}
@@ -864,7 +924,7 @@ const ComponentsSideList: React.FC = () => {
         </main>
         <footer>
           <BottomBar
-            botId={botId}
+            botId={botId ?? ""}
             onSave={handleSave}
             onShare={handleShare}
             onDelete={handleDeleteBot}
