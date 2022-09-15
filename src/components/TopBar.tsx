@@ -16,15 +16,15 @@ const TopBar: React.FC<TopBarProps> = ({
 }) => {
   return (
     <>
-      <div className="z-30 flex items-center p-2 pl-4 bg-red-300">
+      <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
         <Link href="/">
-          <a className="text-gray-800 transition rounded-full hover:text-gray-800/50">
+          <a className="rounded-full text-gray-800 transition hover:text-gray-800/50">
             <MdHome size="24px" />
           </a>
         </Link>
         <div className="ml-4">PJ名：</div>
         <input
-          className="px-2 py-1 rounded"
+          className="rounded px-2 py-1"
           placeholder="プロジェクト名"
           value={name}
           onChange={(e) => {

@@ -545,7 +545,7 @@ const ComponentsSideList: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <main className="flex-grow">
           <TopBar
             name={name}
@@ -654,7 +654,7 @@ const ComponentsSideList: React.FC = () => {
               </div>
               <div
                 id={rootId}
-                className="static flex-grow min-h-screen border border-blue-100 draggable-parent"
+                className="draggable-parent static min-h-screen flex-grow border border-blue-100"
                 onClick={(e) => {
                   // @ts-ignore
                   if (e.target.id === rootId) {
@@ -678,7 +678,7 @@ const ComponentsSideList: React.FC = () => {
                     )
                     return (
                       <div
-                        className="absolute top-0 left-0 w-full h-full"
+                        className="absolute top-0 left-0 h-full w-full"
                         key="temp"
                       >
                         <LineUI
@@ -779,7 +779,7 @@ const ComponentsSideList: React.FC = () => {
                           )}
                         >
                           <button
-                            className="flex items-center px-2 py-1 space-x-1 text-sm text-white bg-blue-400 rounded w-max"
+                            className="flex w-max items-center space-x-1 rounded bg-blue-400 px-2 py-1 text-sm text-white"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDuplicate(node)
@@ -789,7 +789,7 @@ const ComponentsSideList: React.FC = () => {
                             <span>コピー</span>
                           </button>
                           <button
-                            className="flex items-center px-2 py-1 space-x-1 text-sm text-white bg-red-400 rounded w-max"
+                            className="flex w-max items-center space-x-1 rounded bg-red-400 px-2 py-1 text-sm text-white"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDelete(node)
@@ -864,7 +864,7 @@ const ComponentsSideList: React.FC = () => {
                                     )}
                                   />
                                   {/* inputの文字 */}
-                                  <div className="absolute text-sm leading-none text-white -translate-x-1/2 top-full left-1/2">
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
                                     {point.label}
                                   </div>
                                 </button>
@@ -910,7 +910,7 @@ const ComponentsSideList: React.FC = () => {
                         {(node.node.nodeType === "weatherCheckNode" ||
                           node.node.nodeType === "randomNode") &&
                           !node.isInitialNode && (
-                            <div className="absolute text-xs font-bold text-white top-2 left-2 tabular-nums">
+                            <div className="absolute top-2 left-2 text-xs font-bold tabular-nums text-white">
                               #{unwrapId(node.id)}
                             </div>
                           )}
