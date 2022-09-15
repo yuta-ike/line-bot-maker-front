@@ -2,6 +2,7 @@ export type GraphNode = {
   id: string
   node: EditorNode
   pos: Coordinate
+  size: Size
   inPoints: {
     type: string
     label: string
@@ -48,8 +49,17 @@ export type Coordinate = {
   y: number
 }
 
+export type Size = {
+  width: number
+  height: number
+}
+
 export class GraphNodeClass {
   static id = 0
+
+  public static resetId() {
+    GraphNodeClass.id = 0
+  }
 
   public id: string
   public node: EditorNode
@@ -57,6 +67,10 @@ export class GraphNodeClass {
     //座標
     x: number
     y: number
+  }
+  public size: {
+    width: number
+    height: number
   }
   public inPoints: {
     type: string
@@ -77,6 +91,7 @@ export class GraphNodeClass {
     node: EditorNode,
     {
       pos,
+      size,
       inPoints,
       outPoints,
       createrInputValue,
@@ -84,6 +99,7 @@ export class GraphNodeClass {
       id,
     }: {
       pos?: Coordinate //44l、三項演算子、値が入っていないとFalse判定で宣言
+      size?: Size
       inPoints?: Point[] //38l
       outPoints?: Point[]
       createrInputValue?: string
@@ -91,9 +107,10 @@ export class GraphNodeClass {
       id?: string
     } = {},
   ) {
-    this.id = id ?? `${GraphNodeClass.id++}` //idはGlaphNodeClassが呼び出される度に自動でインクリメント
+    this.id = id ?? `${GraphNodeClass.id++}`
     this.node = node
-    this.pos = pos ?? { x: 0, y: 0 } //null合体代入、posがnullなら初期座標として(0,0)を代入
+    this.pos = pos ?? { x: 0, y: 0 }
+    this.size = size ?? { width: 160, height: 90 }
     this.inPoints = inPoints ?? []
     this.outPoints = outPoints ?? []
     this.createrInputValue = createrInputValue ?? ""
@@ -108,6 +125,7 @@ export class GraphNodeClass {
   duplicate(pos: Coordinate = { ...this.pos }) {
     return new GraphNodeClass(structuredClone(this.node), {
       pos,
+      size: { ...this.size },
       inPoints: structuredClone(this.inPoints),
       outPoints: structuredClone(this.outPoints),
       createrInputValue: this.createrInputValue,

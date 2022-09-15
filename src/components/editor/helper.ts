@@ -5,7 +5,9 @@ export const getPointPos = (
   node: GraphNode,
   pointId: number,
 ) => ({
-  x: node.pos.x + (160 / (node[`${inOrOut}Points`].length + 1)) * (pointId + 1),
+  x:
+    node.pos.x +
+    (node.size.width / (node[`${inOrOut}Points`].length + 1)) * (pointId + 1),
   y: node.pos.y + (inOrOut === "in" ? 0 : 80),
 })
 

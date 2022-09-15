@@ -15,6 +15,7 @@ export type LineProps = {
   isFocused: boolean
   onFocus: () => void
   onDelete: () => void
+  isHighlighted?: boolean
 }
 
 const Line: React.FC<LineProps> = ({
@@ -23,6 +24,7 @@ const Line: React.FC<LineProps> = ({
   isFocused,
   onFocus,
   onDelete,
+  isHighlighted = false,
 }) => {
   const startPointPos = getPointPos("out", start.node, start.pointId)
   const endPointPos = getPointPos("in", end.node, end.pointId)
@@ -31,9 +33,10 @@ const Line: React.FC<LineProps> = ({
   return (
     <div className="pointer-events-none absolute top-0 left-0">
       <LineUI
-        startPos={startPointPos}
+        startPos={{ x: startPointPos.x, y: startPointPos.y }}
         delta={{ x: deltaX, y: deltaY }}
         isFocused={isFocused}
+        isHighlighted={isHighlighted}
         onFocus={onFocus}
         onDelete={onDelete}
       />

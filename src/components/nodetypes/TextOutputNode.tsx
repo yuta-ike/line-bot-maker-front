@@ -13,20 +13,18 @@ const TextOutputNode: React.FC<Props> = (props) => {
       node.createrInputValue = inputedText
     }
     updateUserInputValue()
-    console.log(node.createrInputValue)
   }, [inputedText, node])
 
   return (
-    <div className="flex">
-      <div className="text-black">
-        <textarea
-          value={inputedText}
-          onChange={(e) => setInputedText(e.target.value)}
-          cols={5}
-          rows={1}
-        />
-      </div>
-      <div>と出力</div>
+    <div className="flex flex-col items-start w-full text-sm">
+      <input
+        className="p-2 text-black rounded w-max focus:outline-none"
+        placeholder="テキスト"
+        value={inputedText}
+        onChange={(e) => setInputedText(e.target.value)}
+        onClick={(e) => e.preventDefault()}
+      />
+      <p className="block mt-2 shrink-0">と出力</p>
     </div>
   )
 }
