@@ -9,6 +9,7 @@ import CorrespondCheckNode from "./nodetypes/CorrespondCheckNode"
 import RandomNode from "./nodetypes/RandomNode"
 import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
 import TextOutputNode from "./nodetypes/TextOutputNode"
+import StampOutputNode from "./nodetypes/StampOutputNode"
 
 const unwrapId = (id: string): string => {
   if (id.startsWith("SAVED_")) {
@@ -27,6 +28,8 @@ const renderNodeContent = (node: GraphNodeClass) => {
     return <CorrespondCheckNode node={node} />
   } else if (node.node.nodeType == "textOutputNode") {
     return <TextOutputNode node={node} />
+  } else if (node.node.nodeType == "stampOutputNode") {
+    return <StampOutputNode node={node} />
   } else if (node.node.nodeType == "weatherCheckNode") {
     return <WeatherCheckNode />
   } else if (node.node.nodeType == "randomNode") {

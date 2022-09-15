@@ -5,6 +5,11 @@ type FlowInputParam = {
   message: string
 }
 
+export type OutputValue = {
+  type: "text" | "stamp"
+  value: string
+}
+
 /**
  * フローチャートを実行する
  * @param flowChart 実行するフローチャート
@@ -59,6 +64,7 @@ const execFlowChart = (
   let value = message
   let done: boolean = false
   let stepCount = 0
+  let output: OutputValue | null = null
 
   while (nextNodeId != null) {
     const result = stepFlowChartProxy(
@@ -75,6 +81,9 @@ const execFlowChart = (
     nextNodeId = result.nextNodeId
     value = result.value
     done = result.done
+    if (result.done) {
+      output = result.output
+    }
     stepCount += 1
     if (stepCount > 500) {
       throw new FlowchartSyntaxError(
@@ -95,12 +104,13 @@ const execFlowChart = (
 
   return {
     value,
+    output: output as OutputValue,
     stackTrace,
   }
 }
 
 type FlowChartStepResult =
-  | {
+  | ({
       // 成功 or エラーが発生した
       status: "success"
       // 次に遷移するノード
@@ -109,7 +119,16 @@ type FlowChartStepResult =
       value: string
       // プログラムが終了ノードに達したか
       done: boolean
-    }
+    } & (
+      | {
+          done: false
+          output?: undefined
+        }
+      | {
+          done: true
+          output: OutputValue
+        }
+    ))
   | {
       // 成功 or エラーが発生した
       status: "failure"
@@ -299,6 +318,23 @@ const stepFlowChart = (
       value: nextNode.node.createrInputValue,
       nextNodeId: null,
       done: true,
+      output: {
+        type: "text",
+        value: nextNode.node.createrInputValue,
+      },
+    }
+  }
+
+  if (nextNode.node.node.nodeType === "stampOutputNode") {
+    return {
+      status: "success",
+      value: nextNode.node.createrInputValue,
+      nextNodeId: null,
+      done: true,
+      output: {
+        type: "stamp",
+        value: nextNode.node.createrInputValue,
+      },
     }
   }
 

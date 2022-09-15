@@ -13,9 +13,9 @@ const route = async (req: NextApiRequest, res: NextApiResponse<Content>) => {
     const message: string = req.body.message
 
     try {
-      const { value } = execFlowChart(flowchart, { message })
+      const { output } = execFlowChart(flowchart, { message })
 
-      res.status(200).json({ reply: value })
+      res.status(200).json({ reply: output })
     } catch (e) {
       if (e instanceof FlowchartSyntaxError) {
         res.status(400).end()

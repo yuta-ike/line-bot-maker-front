@@ -1,4 +1,3 @@
-import { useRouter } from "next/router"
 import React, {
   Dispatch,
   SetStateAction,
@@ -180,12 +179,14 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
         mockValues,
       )
       return {
+        type: "success" as const,
         ...result,
         error: null,
       }
     } catch (e: unknown) {
       if (e instanceof InterpreterError) {
         return {
+          type: "failure" as const,
           value: null,
           stackTrace: e.stackTrace,
           error: e,
@@ -321,7 +322,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                     node.isInitialNode ? "z-0" : "z-10",
                   )}
                   defaultClassNameDragging="group"
-                  onDrag={(_, data) =>
+                  onDrag={(_, data) => {
+                    setFocusItemId({
+                      type: "node",
+                      nodeId: node.id,
+                    })
                     setNodes((nodes) =>
                       nodes.map((n) =>
                         n.id !== node.id
@@ -332,7 +337,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                             }),
                       ),
                     )
-                  }
+                  }}
                   onStart={() => {
                     regenerateSampleNode(node)
                     setIsDragging(true)
