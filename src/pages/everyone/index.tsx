@@ -65,6 +65,9 @@ const Home: NextPage = () => {
   }, [router, user])
 
   const filteredBot = useMemo(() => {
+    if (bots == null) {
+      return []
+    }
     if (searchInput.length === 0) {
       return bots
     }
