@@ -397,7 +397,7 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col">
         <main className="h-[200vh] w-[200vw] flex-grow">
           <TopBar
             name={name}
@@ -417,7 +417,7 @@ const BotDetail: React.FC = () => {
           />
         </main>
         {isLoading && (
-          <div className="fixed inset-0 flex items-center justify-center w-full h-full font-bold">
+          <div className="fixed inset-0 flex h-full w-full items-center justify-center font-bold">
             ローディング中...
           </div>
         )}

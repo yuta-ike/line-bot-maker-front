@@ -27,11 +27,11 @@ const FileComponent: React.FC<FileComponentProps> = ({
 }) => {
   return (
     <Link href={`/bot/${botId}`}>
-      <a className="flex flex-col items-center w-full">
-        <div className="flex items-center justify-center w-full py-6 bg-gray-200 rounded-lg">
+      <a className="flex w-full flex-col items-center">
+        <div className="flex w-full items-center justify-center rounded-lg bg-gray-200 py-6">
           <BsFillFileCodeFill size={48} />
         </div>
-        <div className="flex w-full my-1 space-x-4 text-lg text-start">
+        <div className="my-1 flex w-full space-x-4 text-start text-lg">
           <img
             src={creatorIconUrl}
             width={32}
@@ -86,24 +86,24 @@ const Home: NextPage = () => {
       <Head>
         <title>LINE Bot Maker</title>
       </Head>
-      <div className="p-4 mt-20 bg-fixed font-mplus">
+      <div className="mt-20 bg-fixed p-4 font-mplus">
         <Header />
-        <div className="flex justify-end w-full">
+        <div className="flex w-full justify-end">
           <button
             onClick={handleCreate}
-            className="w-full p-4 text-white bg-green-500 rounded hover:bg-green-600 sm:w-max"
+            className="w-full rounded bg-green-500 p-4 text-white hover:bg-green-600 sm:w-max"
           >
             新しいBotを作る
           </button>
         </div>
-        <div className="flex flex-col items-center mt-4">
+        <div className="mt-4 flex flex-col items-center">
           <div className="relative flex flex-row">
             <FiSearch
               size={24}
-              className="absolute text-gray-400 -translate-y-1/2 top-1/2 left-4"
+              className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
             />
             <input
-              className="container h-8 py-6 pl-12 pr-8 bg-gray-100 border border-gray-300 border-none rounded-full w-72 font-mplus hover:bg-gray-200 focus:bg-gray-200 focus:outline-none"
+              className="container h-8 w-72 rounded-full border border-none border-gray-300 bg-gray-100 py-6 pl-12 pr-8 font-mplus hover:bg-gray-200 focus:bg-gray-200 focus:outline-none"
               type="text"
               name="search"
               placeholder="キーワードを入力"
@@ -112,14 +112,14 @@ const Home: NextPage = () => {
             />
           </div>
         </div>
-        <div className="p-4 mt-4">
+        <div className="mt-4 p-4">
           {isLoading ||
             (user == null && (
-              <div className="mt-12 font-bold text-center">
+              <div className="mt-12 text-center font-bold">
                 ローデイング中...
               </div>
             ))}
-          <div className="grid max-w-4xl grid-cols-1 gap-4 mx-auto sm:grid-cols-3 md:grid-cols-4">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {filteredBot?.map((bot: any) => (
               <FileComponent
                 key={bot.bot_id}

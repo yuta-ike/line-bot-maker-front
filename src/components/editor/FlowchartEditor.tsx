@@ -220,7 +220,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
           <div className="absolute inset-y-0 left-0 m-2 w-[360px] rounded-xl bg-gray-100" />
           <div
             id={rootId}
-            className="static flex-grow min-h-screen draggable-parent"
+            className="draggable-parent static min-h-screen flex-grow"
             onClick={(e) => {
               // @ts-ignore
               if (e.target.id === rootId) {
@@ -243,7 +243,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                 )
                 return (
                   <div
-                    className="absolute top-0 left-0 w-full h-full"
+                    className="absolute top-0 left-0 h-full w-full"
                     key="temp"
                   >
                     <LineUI

@@ -17,15 +17,15 @@ const TopBar: React.FC<TopBarProps> = ({
 }) => {
   return (
     <>
-      <div className="z-30 flex items-center p-2 pl-4 bg-red-300">
+      <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
         <Link href="/">
-          <a className="text-gray-800 transition rounded-full hover:text-gray-800/50">
+          <a className="rounded-full text-gray-800 transition hover:text-gray-800/50">
             <MdChevronLeft size="36px" />
           </a>
         </Link>
         <div className="ml-4">Botの名前：</div>
         <input
-          className="px-2 py-1 rounded focus:outline-none"
+          className="rounded px-2 py-1 focus:outline-none"
           placeholder="プロジェクト名"
           value={name}
           onChange={(e) => {
@@ -34,7 +34,7 @@ const TopBar: React.FC<TopBarProps> = ({
         />
         <button
           onClick={() => onChangeIsPublic(!isPublic)}
-          className="flex items-center ml-8 space-x-2 leading-none"
+          className="ml-8 flex items-center space-x-2 leading-none"
         >
           <span className="text-sm">
             {isPublic ? "プログラムを公開する　" : "プログラムを公開しない"}

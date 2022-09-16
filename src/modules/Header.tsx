@@ -54,7 +54,7 @@ const Header: React.FC = () => {
       <div css={css(classes.root)}>
         <AppBar css={css(classes.appbar)} position="static" color="primary">
           <Toolbar>
-            <div className="flex items-center flex-grow space-x-8">
+            <div className="flex flex-grow items-center space-x-8">
               <h1
                 className="hidden font-bold sm:flex"
                 style={{ color: "#f8faf7", fontFamily: "'M PLUS Rounded 1c'" }}
@@ -87,8 +87,8 @@ const Header: React.FC = () => {
                 </IconButton>
                 {showPopover && (
                   <div className="absolute top-full right-0 w-[240px] flex-col rounded bg-white shadow-md">
-                    <div className="flex items-center px-4 py-4 space-x-2 border-b border-gray-200">
-                      <div className="w-8 h-8 shrink-0">
+                    <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
+                      <div className="h-8 w-8 shrink-0">
                         <Image
                           src={user.iconUrl ?? ""}
                           css={css(classes.iconimage)}
@@ -117,7 +117,7 @@ const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => login()}
-                className="px-4 py-2 text-white border-2 border-white rounded"
+                className="rounded border-2 border-white px-4 py-2 text-white"
               >
                 ログイン
               </button>
