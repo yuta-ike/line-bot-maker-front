@@ -12,6 +12,7 @@ const Login = () => {
   useEffect(() => {
     user != null && router.push("/")
   })
+  
 
   return (
     <>
