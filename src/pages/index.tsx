@@ -84,7 +84,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>LINE Bot Maker</title>
+        <title>ふろちゃでぼっと</title>
       </Head>
       <div className="mt-20 bg-fixed p-4 font-mplus">
         <Header />

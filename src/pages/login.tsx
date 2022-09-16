@@ -16,7 +16,7 @@ const Login = () => {
   return (
     <>
       <Head>
-        <title>LINE Bot Maker</title>
+        <title>ふろちゃでぼっと</title>
       </Head>
       <div className="h-screen bg-gray-800">
         <div className="flex h-full items-center justify-center bg-gray-100">

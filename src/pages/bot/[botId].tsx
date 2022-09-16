@@ -395,7 +395,7 @@ const BotDetail: React.FC = () => {
   return (
     <>
       <Head>
-        <title>{`${name}｜LINE Bot Maker`}</title>
+        <title>{`${name}｜ふろちゃでぼっと`}</title>
       </Head>
       <div className="flex min-h-screen flex-col">
         <main className="h-[200vh] w-[200vw] flex-grow">
