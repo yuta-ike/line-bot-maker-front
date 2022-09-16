@@ -207,6 +207,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
           <Sidebar
             className="fixed inset-y-[60px] right-0 m-4"
             nodes={nodes}
+            // @ts-ignore
             result={result}
             testcase={testcase}
             setTestcase={setTestcase}
@@ -218,7 +219,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
           <div className="absolute inset-y-0 left-0 w-[360px] bg-gray-100" />
           <div
             id={rootId}
-            className="draggable-parent static min-h-screen flex-grow border border-blue-100"
+            className="static flex-grow min-h-screen border border-blue-100 draggable-parent"
             onClick={(e) => {
               // @ts-ignore
               if (e.target.id === rootId) {
@@ -241,7 +242,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                 )
                 return (
                   <div
-                    className="absolute top-0 left-0 h-full w-full"
+                    className="absolute top-0 left-0 w-full h-full"
                     key="temp"
                   >
                     <LineUI
