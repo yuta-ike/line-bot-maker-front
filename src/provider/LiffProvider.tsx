@@ -110,9 +110,9 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
 
     if (liff.isLoggedIn()) {
       liff.logout()
-      router.reload()
+      window.location.assign("/login")
     }
-  }, [router, value.liff])
+  }, [value.liff])
 
   const operationValue = useMemo(() => ({ login, logout }), [login, logout])
 

@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useLiffOperation, useUser } from "../provider/LiffProvider"
 
 const Login = () => {
-  const { logout, login } = useLiffOperation()
+  const { login } = useLiffOperation()
   const router = useRouter()
   const user = useUser()
 
@@ -19,12 +19,12 @@ const Login = () => {
         <title>LINE Bot Maker</title>
       </Head>
       <div className="h-screen bg-gray-800">
-        <div className="flex h-full items-center justify-center bg-gray-100">
-          <div className=" flex h-[50%] w-[50%] flex-col items-center justify-evenly rounded-lg border bg-white shadow">
-            <div className="text-4xl font-extrabold">ふろちゃでぼっと</div>
+        <div className="flex items-center justify-center h-full bg-gray-100">
+          <div className=" flex h-[50%] w-[800px] max-w-[90%] flex-col items-center justify-evenly rounded-lg border bg-white shadow">
+            <div className="text-3xl font-bold">ふろちゃでぼっと</div>
             <button
               onClick={() => login()}
-              className="w-[50%] rounded-full border-2 border-green-500 bg-green-500 px-8 py-4 text-3xl font-extrabold text-white"
+              className="px-8 py-4 text-xl font-extrabold text-white bg-green-500 border-2 border-green-500 rounded-full w-max"
             >
               LINEでログイン
             </button>

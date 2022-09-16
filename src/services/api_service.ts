@@ -36,14 +36,16 @@ export function useBots({ me }: { me?: boolean } = {}) {
     [url + (me ? "/getIdToken/bot" : "/getIdToken/bot/others"), user?.idToken],
     async (url: string) => {
       if (user?.idToken == null) {
-        throw new Error()
+        const res = await axios.get(url)
+        return res.data
+      } else {
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: user.idToken,
+          },
+        })
+        return res.data
       }
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: user.idToken,
-        },
-      })
-      return res.data
     },
   )
 

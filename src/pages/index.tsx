@@ -91,12 +91,12 @@ const Home: NextPage = () => {
         <div className="flex justify-end w-full">
           <button
             onClick={handleCreate}
-            className="p-4 text-white bg-green-500 rounded hover:bg-green-600"
+            className="w-full p-4 text-white bg-green-500 rounded hover:bg-green-600 sm:w-max"
           >
             新しいBotを作る
           </button>
         </div>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mt-4">
           <div className="relative flex flex-row">
             <FiSearch
               size={24}

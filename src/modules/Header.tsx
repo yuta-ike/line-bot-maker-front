@@ -56,7 +56,7 @@ const Header: React.FC = () => {
           <Toolbar>
             <div className="flex items-center flex-grow space-x-8">
               <h1
-                className="font-bold"
+                className="hidden font-bold sm:flex"
                 style={{ color: "#f8faf7", fontFamily: "'M PLUS Rounded 1c'" }}
               >
                 ふろちゃでぼっと
