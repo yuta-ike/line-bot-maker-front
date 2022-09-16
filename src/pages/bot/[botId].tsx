@@ -57,6 +57,7 @@ const genInitNodes = () => {
           { type: "number", label: "含まない", limit: 1 },
         ],
         isInitialNode: true,
+        createrInputValue: "",
       },
     ),
     new GraphNodeClass(
@@ -80,6 +81,28 @@ const genInitNodes = () => {
           { type: "number", label: "一致しない", limit: 1 },
         ],
         isInitialNode: true,
+        createrInputValue: "",
+      },
+    ),
+    new GraphNodeClass(
+      {
+        label: "追加質問",
+        color: "#dc6ae2",
+        nodeType: "askAnswerNode",
+      },
+      {
+        pos: {
+          x: 50,
+          y: getHeight.next().value as number,
+        },
+        size: {
+          width: 254,
+          height: 90,
+        },
+        inPoints: [{ type: "number", label: "", limit: null }],
+        outPoints: [{ type: "number", label: "答え", limit: 1 }],
+        isInitialNode: true,
+        createrInputValue: "",
       },
     ),
     new GraphNodeClass(
@@ -231,7 +254,7 @@ const BotDetail: React.FC = () => {
             isInitialNode: false,
           }),
       )
-      const maxId = savedNodes.reduce(
+      const maxId = savedNodes.reduce<number>(
         (acc, { id }) => (acc > parseInt(id, 10) ? acc : parseInt(id, 10)),
         -1,
       )
@@ -265,7 +288,7 @@ const BotDetail: React.FC = () => {
   const handleSave = async (_isPublic?: boolean) => {
     if (user == null || botId == null) {
       window.alert("保存に失敗しました!!")
-      return
+      return false
     }
     const flowchart = nodes
       .filter(({ isInitialNode }) => !isInitialNode)
@@ -297,8 +320,10 @@ const BotDetail: React.FC = () => {
         JSON.stringify(flowchart),
         _isPublic ?? isPublic,
       )
+      return true
     } catch {
       showSnackBar("error", "エラーが発生しました")
+      return false
     }
   }
 
@@ -370,7 +395,7 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <TopBar
             name={name}

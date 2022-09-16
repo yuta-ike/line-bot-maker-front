@@ -10,6 +10,27 @@ export type OutputValue = {
   value: string
 }
 
+export type FlowChartSnapshot = {
+  resumeNodeId: string
+  stackTrace: StackTrace
+}
+
+export type ExecFlowChartResult =
+  | {
+      finish: true
+      value: string
+      output: OutputValue
+      stackTrace: StackTrace
+      snapshot?: undefined
+    }
+  | {
+      finish: false
+      value?: undefined
+      output: OutputValue
+      stackTrace?: undefined
+      snapshot: FlowChartSnapshot
+    }
+
 /**
  * フローチャートを実行する
  * @param flowChart 実行するフローチャート
@@ -21,19 +42,34 @@ const execFlowChart = (
   flowChart: FlowChart,
   { message }: FlowInputParam,
   mockValues?: Record<string, string>,
-) => {
-  // validation: input node
-  const inputNodes = flowChart.filter(
-    (chart) => chart.node.node.nodeType === "textInputNode",
-  )
-  if (inputNodes.length == 0) {
-    throw new FlowchartSyntaxError("NO_INPUT_NODE", "入力ノードがありません")
-  } else if (2 <= inputNodes.length) {
-    throw new FlowchartSyntaxError(
-      "MULTIPLE_INPUT_NODE",
-      "入力ノードが複数あります",
+  handoverSnapshot?: FlowChartSnapshot,
+): ExecFlowChartResult => {
+  const inputNode = (() => {
+    if (handoverSnapshot != null) {
+      const initialNode = flowChart.find(
+        ({ id }) => id === handoverSnapshot.resumeNodeId,
+      )
+      if (initialNode == null) {
+        // TODO: 実行中にプログラムが更新された場合
+        throw new Error("Unexpected Error")
+      }
+      return initialNode
+    }
+
+    // validation: input node
+    const inputNodes = flowChart.filter(
+      (chart) => chart.node.node.nodeType === "textInputNode",
     )
-  }
+    if (inputNodes.length == 0) {
+      throw new FlowchartSyntaxError("NO_INPUT_NODE", "入力ノードがありません")
+    } else if (2 <= inputNodes.length) {
+      throw new FlowchartSyntaxError(
+        "MULTIPLE_INPUT_NODE",
+        "入力ノードが複数あります",
+      )
+    }
+    return inputNodes[0]
+  })()
 
   // validation: id duplication
   const ids = flowChart.map(({ id }) => id)
@@ -56,9 +92,7 @@ const execFlowChart = (
   //   }
   // })
 
-  const stackTrace: StackTrace = []
-
-  const inputNode = inputNodes[0]
+  const stackTrace: StackTrace = handoverSnapshot?.stackTrace ?? []
 
   let nextNodeId: string | null = inputNode.id
   let value = message
@@ -71,10 +105,19 @@ const execFlowChart = (
       stackTrace,
       flowChart,
       nextNodeId,
-      message,
+      value,
       mockValues,
     )
-    if (result.status === "failure") {
+    if (result.status === "suspense") {
+      return {
+        finish: false,
+        output: result.output,
+        snapshot: {
+          resumeNodeId: result.nextNodeId,
+          stackTrace,
+        },
+      }
+    } else if (result.status === "failure") {
       result.error.stackTrace = stackTrace
       throw result.error
     }
@@ -103,6 +146,7 @@ const execFlowChart = (
   }
 
   return {
+    finish: true,
     value,
     output: output as OutputValue,
     stackTrace,
@@ -130,12 +174,16 @@ type FlowChartStepResult =
         }
     ))
   | {
-      // 成功 or エラーが発生した
       status: "failure"
-      // 保持する値
       value: string | null
-      // エラー
       error: InterpreterError
+    }
+  | {
+      status: "suspense"
+      value: null
+      nextNodeId: string
+      output: OutputValue
+      done: false
     }
 
 /**
@@ -163,7 +211,7 @@ const stepFlowChartProxy = (
       outMessage: result.value,
       done: result.done,
     })
-  } else {
+  } else if (result.status === "failure") {
     stackTrace.push({
       result: "failure",
       nodeId: nextNodeId,
@@ -253,6 +301,30 @@ const stepFlowChart = (
         value,
         done: false,
       }
+    }
+  }
+
+  if (nextNode.node.node.nodeType === "askAnswerNode") {
+    if (mockValues != null) {
+      const mockValue = mockValues[nextNodeId] ?? ""
+      return {
+        status: "success",
+        nextNodeId: nextNode.outputs[0],
+        value: mockValue,
+        done: false,
+      }
+    } else {
+      return {
+        status: "suspense",
+        nextNodeId: nextNode.outputs[0],
+        value: null,
+        done: false,
+        output: {
+          type: "text",
+          value: nextNode.node.createrInputValue,
+        },
+      }
+      // TODO: ココ!!!!!!!!!!!
     }
   }
 

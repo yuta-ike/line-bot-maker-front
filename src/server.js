@@ -16,6 +16,7 @@ const handle = app.getRequestHandler()
   const expressApp = express()
 
   expressApp.get("*", (req, res) => handle(req, res))
+  expressApp.post("*", (req, res) => handle(req, res))
 
   // Use HTTPS if HTTPS option enabled
   const hasCertificates =

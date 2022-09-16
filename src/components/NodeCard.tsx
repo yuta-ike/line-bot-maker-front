@@ -10,6 +10,7 @@ import RandomNode from "./nodetypes/RandomNode"
 import WeatherCheckNode from "./nodetypes/WeatherCheckNode"
 import TextOutputNode from "./nodetypes/TextOutputNode"
 import StampOutputNode from "./nodetypes/StampOutputNode"
+import AskAnswerNode from "./nodetypes/AskAnswerNode"
 
 const unwrapId = (id: string): string => {
   if (id.startsWith("SAVED_")) {
@@ -30,6 +31,8 @@ const renderNodeContent = (node: GraphNodeClass) => {
     return <TextOutputNode node={node} />
   } else if (node.node.nodeType == "stampOutputNode") {
     return <StampOutputNode node={node} />
+  } else if (node.node.nodeType == "askAnswerNode") {
+    return <AskAnswerNode node={node} />
   } else if (node.node.nodeType == "weatherCheckNode") {
     return <WeatherCheckNode />
   } else if (node.node.nodeType == "randomNode") {
@@ -109,7 +112,7 @@ const NodeCard: React.FC<NodeCardProps> = ({
         onClick={onClick}
       >
         {!node.isInitialNode && (
-          <div className="absolute top-1 left-1 text-xs font-bold tabular-nums text-white">
+          <div className="absolute text-xs font-bold text-white top-1 left-1 tabular-nums">
             #{node.id}
           </div>
         )}
@@ -135,7 +138,7 @@ const NodeCard: React.FC<NodeCardProps> = ({
           })}
         </div>
         {/* outPointsの描画 */}
-        <div className="absolute inset-x-0 bottom-0 mt-2 flex translate-y-1/2 justify-evenly">
+        <div className="absolute inset-x-0 bottom-0 flex mt-2 translate-y-1/2 justify-evenly">
           {node.outPoints.map((point, i) => (
             <OutPointButton
               key={i}
@@ -216,7 +219,7 @@ const InPointButton: React.FC<InPointButtonProps> = ({
             : "scale-50 cursor-not-allowed border-gray-100 bg-gray-300",
         )}
       />
-      <div className="absolute top-full left-1/2 -translate-x-1/2 text-sm leading-none text-white">
+      <div className="absolute text-sm leading-none text-white -translate-x-1/2 top-full left-1/2">
         {label}
       </div>
     </button>
@@ -261,7 +264,7 @@ const OutPointButton: React.FC<OutPointButtonProps> = ({
         {label}
       </div>
       {showNoConnectError && (
-        <div className="absolute left-1/2 top-full mt-1 w-max -translate-x-1/2 rounded-xl border-4 border-pink-500 bg-white p-2 text-sm text-black">
+        <div className="absolute p-2 mt-1 text-sm text-black -translate-x-1/2 bg-white border-4 border-pink-500 left-1/2 top-full w-max rounded-xl">
           ノードが繋がっていません
         </div>
       )}
