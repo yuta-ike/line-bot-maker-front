@@ -32,9 +32,32 @@ export async function postLogin(idToken: string) {
 
 export function useBots({ me }: { me?: boolean } = {}) {
   const user = useUser()
-  console.log(url + (me ? "/getIdToken/bot" : "/getIdToken/bot/others"))
   const { data, error } = useSWR(
-    url + (me ? "/getIdToken/bot" : "/getIdToken/bot/others"),
+    [url + (me ? "/getIdToken/bot" : "/getIdToken/bot/others"), user?.idToken],
+    async (url: string) => {
+      if (user?.idToken == null) {
+        throw new Error()
+      }
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: user.idToken,
+        },
+      })
+      return res.data
+    },
+  )
+
+  return {
+    data,
+    isLoading: !error && !data,
+    isError: error,
+  }
+}
+
+export function useAvailableBots() {
+  const user = useUser()
+  const { data, error } = useSWR(
+    [url + "/getIdToken/bot/available", user?.idToken],
     async (url: string) => {
       if (user?.idToken == null) {
         throw new Error()

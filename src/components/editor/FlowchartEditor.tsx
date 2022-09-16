@@ -207,6 +207,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
           <Sidebar
             className="fixed inset-y-[60px] right-0 m-4"
             nodes={nodes}
+            // @ts-ignore
             result={result}
             testcase={testcase}
             setTestcase={setTestcase}

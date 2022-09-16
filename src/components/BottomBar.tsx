@@ -8,7 +8,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string
 
 export type BottomBarProps = {
   botId: string
-  onSave: () => Promise<void> | void
+  onSave: () => Promise<boolean> | boolean
   onShare: () => Promise<void> | void
   onDelete: () => Promise<void> | void
   onReset: () => void
@@ -51,8 +51,10 @@ const BottomBar: React.FC<BottomBarProps> = ({
   }
 
   const handleSave = async () => {
-    await onSave()
-    showSnackBar("ok", "保存しました!!")
+    const res = await onSave()
+    if (res) {
+      showSnackBar("ok", "保存しました!!")
+    }
   }
 
   const handleDelete = async () => {

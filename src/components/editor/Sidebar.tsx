@@ -52,6 +52,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             return { nodeType: "weatherCheckNode", node }
           } else if (node.node.nodeType === "randomNode") {
             return { nodeType: "randomNode", node }
+          } else if (node.node.nodeType === "askAnswerNode") {
+            return { nodeType: "askAnswerNode", node }
           } else {
             return null
           }
@@ -87,40 +89,65 @@ const Sidebar: React.FC<SidebarProps> = ({
       {effectInputs?.map(({ nodeType, node }, i) => (
         <div key={node.id} className={classNames(i === 0 && "!mt-6")}>
           <div className="text-sm text-gray-500">
-            ダミー値: {nodeType === "weatherCheckNode" ? "天気" : "ランダム"}
+            ダミー値:{" "}
+            {nodeType === "weatherCheckNode"
+              ? "天気"
+              : nodeType === "randomNode"
+              ? "ランダム"
+              : "質問"}
             (#
             {node.id})
-          </div>
-          <select
-            className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
-            placeholder="入力値"
-            value={mockValues[node.id]}
-            onChange={(e) =>
-              setMockValues((prev) => ({
-                ...prev,
-                [node.id]: e.target.value,
-              }))
-            }
-          >
-            {nodeType === "weatherCheckNode" ? (
-              <>
-                <option value="sunny">晴れ</option>
-                <option value="cloudy">曇り</option>
-                <option value="rainy">雨</option>
-              </>
-            ) : (
-              <>
-                <option value="A">A</option>
-                <option value="B">B</option>
-              </>
+            {nodeType === "askAnswerNode" && (
+              <span className="mt-1 block">Q.{node.createrInputValue}</span>
             )}
-          </select>
+          </div>
+          {nodeType === "askAnswerNode" ? (
+            <input
+              type="text"
+              className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+              placeholder="答え"
+              value={mockValues[node.id]}
+              onChange={(e) =>
+                setMockValues((prev) => ({
+                  ...prev,
+                  [node.id]: e.target.value,
+                }))
+              }
+            />
+          ) : (
+            <select
+              className="w-full max-w-[203px] rounded border border-[#efefef] px-3 py-2 focus:outline-none"
+              placeholder="入力値"
+              value={mockValues[node.id]}
+              onChange={(e) =>
+                setMockValues((prev) => ({
+                  ...prev,
+                  [node.id]: e.target.value,
+                }))
+              }
+            >
+              {nodeType === "weatherCheckNode" ? (
+                <>
+                  <option value="sunny">晴れ</option>
+                  <option value="cloudy">曇り</option>
+                  <option value="rainy">雨</option>
+                </>
+              ) : (
+                <>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                </>
+              )}
+            </select>
+          )}
         </div>
       ))}
       <div className="!mt-6">
         <div className="text-sm text-gray-500">出力</div>
         <div className="flex w-full max-w-[203px] items-center">
-          <div className="shrink-0 text-sm">スタンプ： </div>
+          {result.type === "success" && result.output.type === "stamp" && (
+            <div className="shrink-0 text-sm">スタンプ： </div>
+          )}
           <input
             className={classNames(
               "w-full rounded border border-[#efefef] bg-gray-100 px-3 py-2 focus:outline-none",
