@@ -77,7 +77,7 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
       }
       if (forceLogin || !liff.isLoggedIn()) {
         liff.login({
-          redirectUri,
+          redirectUri: redirectUri ?? window.location.href,
         })
       }
       const profile = await liff.getProfile()
