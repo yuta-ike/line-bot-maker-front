@@ -209,6 +209,7 @@ const BotDetail: React.FC = () => {
   const [edges, setEdges] = useState<Edge[]>([])
   const [testcase, setTestcase] = useState("Hello")
   const [mockValues, setMockValues] = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(true)
 
   const botId = router.query.botId as string | undefined
 
@@ -279,6 +280,7 @@ const BotDetail: React.FC = () => {
       ])
       setName(res.name)
       setIsPublic(res.is_public)
+      setIsLoading(false)
     })()
   }, [botId, user?.idToken])
 
@@ -395,8 +397,8 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜LINE Bot Maker`}</title>
       </Head>
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-grow">
+      <div className="flex flex-col min-h-screen">
+        <main className="h-[200vh] w-[200vw] flex-grow">
           <TopBar
             name={name}
             onChangeName={setName}
@@ -414,6 +416,11 @@ const BotDetail: React.FC = () => {
             setMockValues={setMockValues}
           />
         </main>
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center w-full h-full font-bold">
+            ローディング中...
+          </div>
+        )}
       </div>
       <footer>
         <BottomBar

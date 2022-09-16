@@ -1,5 +1,6 @@
+import classNames from "classnames"
 import Link from "next/link"
-import { MdHome } from "react-icons/md"
+import { MdChevronLeft, MdHome } from "react-icons/md"
 
 export type TopBarProps = {
   name: string
@@ -16,26 +17,42 @@ const TopBar: React.FC<TopBarProps> = ({
 }) => {
   return (
     <>
-      <div className="z-30 flex items-center bg-red-300 p-2 pl-4">
+      <div className="z-30 flex items-center p-2 pl-4 bg-red-300">
         <Link href="/">
-          <a className="rounded-full text-gray-800 transition hover:text-gray-800/50">
-            <MdHome size="24px" />
+          <a className="text-gray-800 transition rounded-full hover:text-gray-800/50">
+            <MdChevronLeft size="36px" />
           </a>
         </Link>
-        <div className="ml-4">PJ名：</div>
+        <div className="ml-4">Botの名前：</div>
         <input
-          className="rounded px-2 py-1"
+          className="px-2 py-1 rounded focus:outline-none"
           placeholder="プロジェクト名"
           value={name}
           onChange={(e) => {
             onChangeName(e.target.value)
           }}
         />
-        <div className="ml-auto">
-          <button onClick={() => onChangeIsPublic(!isPublic)}>
-            {isPublic ? "公開中" : "非公開"}
-          </button>
-        </div>
+        <button
+          onClick={() => onChangeIsPublic(!isPublic)}
+          className="flex items-center ml-8 space-x-2 leading-none"
+        >
+          <span className="text-sm">
+            {isPublic ? "プログラムを公開する　" : "プログラムを公開しない"}
+          </span>
+          <div
+            className={classNames(
+              "relative h-[24px] w-[40px] rounded-full",
+              isPublic ? "bg-green-500" : "bg-gray-300",
+            )}
+          >
+            <div
+              className={classNames(
+                "absolute top-[2px] h-[20px] w-[20px] rounded-full bg-white shadow",
+                isPublic ? "right-[2px]" : "left-[2px]",
+              )}
+            />
+          </div>
+        </button>
       </div>
     </>
   )

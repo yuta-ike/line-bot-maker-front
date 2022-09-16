@@ -101,13 +101,13 @@ const BottomBar: React.FC<BottomBarProps> = ({
       <div className="fixed inset-x-0 bottom-0 flex justify-between">
         <div>
           <button
-            className="m-4 h-12 w-20 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="w-20 h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleDelete}
           >
             削除
           </button>
           <button
-            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleReset}
           >
             リセット
@@ -115,16 +115,16 @@ const BottomBar: React.FC<BottomBarProps> = ({
         </div>
         <div className="flex">
           <button
-            className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-gray-300 rounded shadow-md"
             onClick={handleSave}
           >
-            保存
+            一時保存
           </button>
           <button
-            className="m-4 h-12 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+            className="h-12 p-4 m-4 leading-none text-center bg-red-300 rounded shadow-md"
             onClick={openModal}
           >
-            保存して公開
+            保存して利用する
           </button>
           <Modal
             style={customStyles}
@@ -141,7 +141,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
               <p>
                 QRコードをスマートフォンで読み取るか、「共有URLのシェア」、「LINEのシェア」のいずれかで利用してみましょう
               </p>
-              <div className="flex w-full justify-center py-4">
+              <div className="flex justify-center w-full py-4">
                 <Image
                   src={qrImage}
                   alt=""
@@ -152,13 +152,13 @@ const BottomBar: React.FC<BottomBarProps> = ({
               </div>
               <div className="flex w-full">
                 <button
-                  className="mt-4 ml-4 h-12 flex-1 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
+                  className="flex-1 h-12 p-4 mt-4 ml-4 leading-none text-center bg-gray-300 rounded shadow-md"
                   onClick={handleCopyUrl}
                 >
                   共有URLをコピー
                 </button>
                 <button
-                  className="mt-4 ml-4 h-12 w-40 flex-1 rounded bg-red-300 p-4 text-center leading-none shadow-md"
+                  className="flex-1 w-40 h-12 p-4 mt-4 ml-4 leading-none text-center bg-red-300 rounded shadow-md"
                   onClick={shareLink}
                 >
                   LINEにシェアする

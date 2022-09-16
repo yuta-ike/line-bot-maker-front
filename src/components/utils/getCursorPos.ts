@@ -8,8 +8,8 @@ const useCursorPos = (keepUpdate: boolean) => {
   useEffect(() => {
     const listener = throttle(10, (e: MouseEvent) => {
       setPos({
-        x: e.clientX,
-        y: e.clientY,
+        x: e.pageX,
+        y: e.pageY,
       })
     })
 

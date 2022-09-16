@@ -137,11 +137,12 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
 
   useEffect(() => {
     if (!isDragging) {
-      setNodes((nodes) =>
-        nodes.filter((node) => 360 <= node.pos.x || node.isInitialNode),
+      const deleteNodes = nodes.filter(
+        (node) => node.pos.x < 360 && !node.isInitialNode,
       )
+      deleteNodes.forEach((node) => handleDelete(node))
     }
-  }, [isDragging, setNodes])
+  }, [handleDelete, isDragging, nodes, setNodes])
 
   /**
    * フローチャートのリアルタイム実行
@@ -216,10 +217,10 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
             showFlowDebug={showFlowDebug}
             onChangeShowFlowDebug={(v) => setShowFlowDebug(v)}
           />
-          <div className="absolute inset-y-0 left-0 w-[360px] bg-gray-100" />
+          <div className="absolute inset-y-0 left-0 m-2 w-[360px] rounded-xl bg-gray-100" />
           <div
             id={rootId}
-            className="draggable-parent static min-h-screen flex-grow border border-blue-100"
+            className="static flex-grow min-h-screen draggable-parent"
             onClick={(e) => {
               // @ts-ignore
               if (e.target.id === rootId) {
@@ -242,7 +243,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                 )
                 return (
                   <div
-                    className="absolute top-0 left-0 h-full w-full"
+                    className="absolute top-0 left-0 w-full h-full"
                     key="temp"
                   >
                     <LineUI
@@ -324,20 +325,20 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                   )}
                   defaultClassNameDragging="group"
                   onDrag={(_, data) => {
+                    const newPos = {
+                      x: Math.round(data.x),
+                      y: Math.round(data.y),
+                    }
+
                     setFocusItemId({
                       type: "node",
                       nodeId: node.id,
                     })
-                    setNodes((nodes) =>
-                      nodes.map((n) =>
-                        n.id !== node.id
-                          ? n
-                          : n.setPos({
-                              x: Math.round(data.x),
-                              y: Math.round(data.y),
-                            }),
-                      ),
-                    )
+                    setNodes((nodes) => {
+                      return nodes.map((n) =>
+                        n.id !== node.id ? n : n.setPos(newPos),
+                      )
+                    })
                   }}
                   onStart={() => {
                     regenerateSampleNode(node)
@@ -348,7 +349,9 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
                   <div>
                     <NodeCard
                       className={classNames(
-                        !node.isInitialNode && node.pos.x < 360 && "opacity-80",
+                        !node.isInitialNode &&
+                          node.pos.x < 360 &&
+                          "scale-75 opacity-80",
                         showFlowDebug &&
                           result.stackTrace
                             ?.map(({ nodeId }) => nodeId)
