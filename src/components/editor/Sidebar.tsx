@@ -98,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             (#
             {node.id})
             {nodeType === "askAnswerNode" && (
-              <span className="block mt-1">Q.{node.createrInputValue}</span>
+              <span className="mt-1 block">Q.{node.createrInputValue}</span>
             )}
           </div>
           {nodeType === "askAnswerNode" ? (
@@ -146,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="text-sm text-gray-500">出力</div>
         <div className="flex w-full max-w-[203px] items-center">
           {result.type === "success" && result.output.type === "stamp" && (
-            <div className="text-sm shrink-0">スタンプ： </div>
+            <div className="shrink-0 text-sm">スタンプ： </div>
           )}
           <input
             className={classNames(
