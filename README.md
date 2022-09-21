@@ -6,11 +6,11 @@ Front-end repository of "ふろちゃでぼっと" created by students in Kyoto 
 - [発表資料](https://docs.google.com/presentation/d/1ppaFRecLssDuJEaxndWJUHQG2cfsEdfi/edit#slide=id.p1)
 - [バックエンドレポジトリ](https://github.com/xiaogeamadeus/linebot_backend2)
 
-![line-bot-maker-demo2](https://user-images.githubusercontent.com/38308823/181484172-08841425-61c8-4214-8835-27a12ef3211c.gif)
+<video src="https://user-images.githubusercontent.com/38308823/191561558-c18b676f-7e45-47d8-a7a7-d9b90227e9d7.mp4"></video>
 
 <details>
-<summary>デモ動画</summary>
-<video src="https://user-images.githubusercontent.com/38308823/181482489-abe26305-c1b3-4d2c-9475-1589c003afad.mp4"></video>
+<summary>Gif (Old version)</summary>
+<img src="https://user-images.githubusercontent.com/38308823/181484172-08841425-61c8-4214-8835-27a12ef3211c.gif"/>
 </details>
 
 ## 技術スタック
