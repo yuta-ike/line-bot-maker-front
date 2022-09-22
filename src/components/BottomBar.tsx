@@ -118,7 +118,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
             className="m-4 h-12 rounded bg-gray-300 p-4 text-center leading-none shadow-md"
             onClick={handleSave}
           >
-            一時保存
+            保存
           </button>
           <button
             className="m-4 h-12 rounded bg-red-300 p-4 text-center leading-none shadow-md"
