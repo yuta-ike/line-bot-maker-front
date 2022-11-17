@@ -3,6 +3,8 @@ import Header from "../modules/Header"
 import { useUser } from "../provider/LiffProvider"
 import { useRouter } from "next/router"
 import { activateBot, useAvailableBots } from "../services/api_service"
+import Image from "next/image"
+import { useAuthRoute } from "../utils/useRoute"
 
 const LINE_BOT_BASIC_ID = process.env.NEXT_PUBLIC_LINE_BOT_BASIC_ID as string
 
@@ -24,27 +26,33 @@ const FileComponent: React.FC<FileComponentProps> = ({
   onClickUse,
 }) => {
   return (
-    <div className="flex-row border-b border-gray-300 pb-4 md:flex">
+    <div className="flex-row pb-4 border-b border-gray-300 md:flex">
       <div className="basis-1/3" />
       <div className="basis-1/6">
         <div className="flex flex-col">
-          <p className="w-auto truncate rounded-lg font-mplus text-lg">
+          <p className="w-auto text-lg truncate rounded-lg font-mplus">
             {name}
           </p>
-          <div className="flex items-center truncate rounded-lg font-mplus text-sm">
-            <div className="shrink-0 p-2">
-              <img src={creatorIconUrl} className="h-6 w-6 rounded-full" />
+          <div className="flex items-center text-sm truncate rounded-lg font-mplus">
+            <div className="p-2 shrink-0">
+              <Image
+                width={24}
+                height={24}
+                alt=""
+                src={creatorIconUrl}
+                className="w-6 h-6 rounded-full"
+              />
             </div>
             {creatorName}
           </div>
-          <div className="rounded-sm font-mplus text-xs">{update}</div>
+          <div className="text-xs rounded-sm font-mplus">{update}</div>
         </div>
       </div>
 
       <div className="w-[148px] shrink-0 basis-1/12">
         <button
           onClick={onClickUse}
-          className="rounded bg-green-500 p-3 text-white hover:bg-green-600"
+          className="p-3 text-white bg-green-500 rounded hover:bg-green-600"
         >
           使ってみる
         </button>
@@ -55,8 +63,10 @@ const FileComponent: React.FC<FileComponentProps> = ({
 }
 
 const BotSelect: NextPage = () => {
+  useAuthRoute()
+
   const router = useRouter()
-  const user = useUser()
+  const { user } = useUser()
 
   const { data: bots, isLoading } = useAvailableBots()
 
@@ -68,31 +78,31 @@ const BotSelect: NextPage = () => {
   }
 
   return (
-    <div className="mt-20 bg-fixed p-4 font-mplus">
+    <div className="p-4 mt-20 bg-fixed font-mplus">
       <Header />
-      <div className="flex-col items-center rounded-lg text-2xl md:flex">
+      <div className="flex-col items-center text-2xl rounded-lg md:flex">
         現在利用できるBot
       </div>
-      <div className="mt-4 p-4">
+      <div className="p-4 mt-4">
         {user == null ? (
-          <div className="mx-auto text-center text-lg">ログイン中</div>
+          <div className="mx-auto text-lg text-center">ログイン中</div>
         ) : isLoading ? (
-          <div className="mx-auto text-center text-lg">ロード中</div>
+          <div className="mx-auto text-lg text-center">ロード中</div>
         ) : (
           <div>
             {bots?.map((bot: any) => (
               <FileComponent
-                key={bot.botId}
+                key={bot.bot_id}
                 botId={bot.bot_id}
                 name={bot.name}
                 creatorName={user?.name ?? ""}
                 creatorIconUrl={user?.iconUrl ?? ""}
                 update={""}
-                onClickUse={() => handleOnClick(bot.id as string)}
+                onClickUse={() => handleOnClick(bot.bot_id as string)}
               />
             ))}
             {bots != null && bots.length === 0 && (
-              <div className="mx-auto text-center text-lg">
+              <div className="mx-auto text-lg text-center">
                 利用できるBotはありません
               </div>
             )}

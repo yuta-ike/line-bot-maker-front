@@ -31,7 +31,7 @@ export async function postLogin(idToken: string) {
 }
 
 export function useBots({ me }: { me?: boolean } = {}) {
-  const user = useUser()
+  const { user } = useUser()
   const { data, error } = useSWR(
     [url + (me ? "/getIdToken/bot" : "/getIdToken/bot/others"), user?.idToken],
     async (url: string) => {
@@ -57,7 +57,7 @@ export function useBots({ me }: { me?: boolean } = {}) {
 }
 
 export function useAvailableBots() {
-  const user = useUser()
+  const { user } = useUser()
   const { data, error } = useSWR(
     [url + "/getIdToken/bot/available", user?.idToken],
     async (url: string) => {

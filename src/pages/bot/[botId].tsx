@@ -9,7 +9,9 @@ import { FlowChart } from "../../interpreter/type"
 import buildInviteMessage from "../../components/utils/flexMessage"
 import { deleteBot, getBot, updateBot } from "../../services/api_service"
 import Head from "next/head"
+import Image from "next/image"
 import FlowchartEditor from "../../components/editor/FlowchartEditor"
+import { useAuthRoute } from "../../utils/useRoute"
 
 const genInitNodes = () => {
   const getHeightGenerator = function* () {
@@ -199,9 +201,11 @@ const unwrapId = (id: string): string => {
 }
 
 const BotDetail: React.FC = () => {
+  useAuthRoute()
+
   const router = useRouter()
   const liff = useLiff()
-  const user = useUser()
+  const { user } = useUser()
 
   const [name, setName] = useState("")
   const [isPublic, setIsPublic] = useState(false)
@@ -211,27 +215,23 @@ const BotDetail: React.FC = () => {
   const [mockValues, setMockValues] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
 
+  const [showTutorial, setShowTutorial] = useState(
+    localStorage.getItem("BOT_EDITOR_OPERATION_TUTORIAL") == null,
+  )
+
+  useEffect(() => {
+    if (!showTutorial) {
+      localStorage.setItem("BOT_EDITOR_OPERATION_TUTORIAL", "true")
+    }
+  }, [showTutorial])
+
+  const [tutorialStep, setTutorialStep] = useState(0)
+
   const botId = router.query.botId as string | undefined
 
   useEffect(() => {
     return () => GraphNodeClass.resetId()
   }, [])
-
-  // const [focusItemId, setFocusItemId] = useState<
-  //   | { type: "node"; nodeId: string }
-  //   | {
-  //       type: "edge"
-  //       start: {
-  //         nodeId: string
-  //         pointId: number
-  //       }
-  //       end: {
-  //         nodeId: string
-  //         pointId: number
-  //       }
-  //     }
-  //   | null
-  // >(null)
 
   /**
    * データベースから初期位置となるフローチャートを取得
@@ -397,7 +397,7 @@ const BotDetail: React.FC = () => {
       <Head>
         <title>{`${name}｜ふろちゃでぼっと`}</title>
       </Head>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex flex-col min-h-screen">
         <main className="h-[200vh] w-[200vw] flex-grow">
           <TopBar
             name={name}
@@ -417,7 +417,7 @@ const BotDetail: React.FC = () => {
           />
         </main>
         {isLoading && (
-          <div className="fixed inset-0 flex h-full w-full items-center justify-center font-bold">
+          <div className="fixed inset-0 flex items-center justify-center w-full h-full font-bold">
             ローディング中...
           </div>
         )}
@@ -431,6 +431,73 @@ const BotDetail: React.FC = () => {
           onReset={handleReset}
         />
       </footer>
+      {showTutorial && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+          <div className="flex w-[600px] max-w-full flex-col items-center rounded-md bg-white p-4">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
+              {tutorialStep === 0
+                ? "ブロックを動かそう"
+                : tutorialStep === 1
+                ? "ブロック同士を繋げよう"
+                : tutorialStep === 2
+                ? "動作を確認しよう"
+                : "ボットを使おう"}
+            </h2>
+            <p className="mb-4 text-gray-600">
+              {tutorialStep === 0 ? (
+                "ブロックは、ドラッグ&ドロップで動かすことができます"
+              ) : tutorialStep === 1 ? (
+                <>
+                  丸をクリック → カーソルを移動 →
+                  繋げたい丸の上でもう一度クリック
+                  すると、線で繋ぐことができます
+                  <br />
+                  <span className="text-sm text-gray-400">
+                    ※ ブロックの移動と操作方法が違うのでご注意ください
+                  </span>
+                </>
+              ) : tutorialStep === 2 ? (
+                "「実行フローをエディタに反映する」にチェックを入れると、実行フローがピンク色で表示されます"
+              ) : (
+                "完成したら、右下の「保存して公開」から、実際に使ってみよう。QRコードをスマホで読み取ることで、LINEで利用できるようになります"
+              )}
+            </p>
+            <Image
+              src={
+                tutorialStep === 0
+                  ? "/tutorial/tutorial_1.gif"
+                  : tutorialStep === 1
+                  ? "/tutorial/tutorial_2.gif"
+                  : tutorialStep === 2
+                  ? "/tutorial/tutorial_3.gif"
+                  : "/tutorial/tutorial_4.png"
+              }
+              alt=""
+              width={600}
+              height={400}
+            />
+            <div className="flex justify-between w-full mt-4">
+              <button
+                className="rounded border border-gray-300 px-5 py-1.5 hover:bg-gray-100"
+                onClick={() => setShowTutorial(false)}
+              >
+                スキップ
+              </button>
+              <button
+                className="rounded bg-red-300 px-5 py-1.5 hover:shadow"
+                onClick={() => {
+                  setTutorialStep((prev) => prev + 1)
+                  if (tutorialStep === 3) {
+                    setShowTutorial(false)
+                  }
+                }}
+              >
+                {tutorialStep === 3 ? "完了" : "次へ"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

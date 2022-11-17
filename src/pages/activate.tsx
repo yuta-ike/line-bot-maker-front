@@ -5,12 +5,15 @@ import { useEffect, useState } from "react"
 import Header from "../modules/Header"
 import { useLiffOperation, useUser } from "../provider/LiffProvider"
 import { activateBot } from "../services/api_service"
+import { useAuthRoute } from "../utils/useRoute"
 
 const LINE_BOT_BASIC_ID = process.env.NEXT_PUBLIC_LINE_BOT_BASIC_ID as string
 
 const Activate: NextPage = () => {
+  useAuthRoute()
+
   const router = useRouter()
-  const user = useUser()
+  const { user } = useUser()
   const [isActivated, setIsActivated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isAlreadyActivated, setIsAlreadyActivated] = useState(false)
@@ -22,6 +25,13 @@ const Activate: NextPage = () => {
   }, [login, router.asPath])
 
   useEffect(() => {
+    console.log(
+      isLoading,
+      isActivated,
+      user == null,
+      botId == null,
+      typeof botId !== "string",
+    )
     if (
       isLoading ||
       isActivated ||

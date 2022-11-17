@@ -19,8 +19,14 @@ export type User = {
   idToken: string | null
 }
 
-export type LiffContextType = { liff: Liff | null; user: User | null }
-const liffContextInit: LiffContextType = { liff: null, user: null }
+export type LiffContextType = {
+  liff: Liff | null
+  user: { user: User; isLoading: false } | { user: null; isLoading: boolean }
+}
+const liffContextInit: LiffContextType = {
+  liff: null,
+  user: { user: null, isLoading: true },
+}
 const LiffContext = React.createContext<LiffContextType>(liffContextInit)
 
 export type LiffOperationContextType = {
@@ -41,7 +47,6 @@ type LiffProviderProps = {
 
 const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
   const [value, setValue] = useState<LiffContextType>(liffContextInit)
-  const router = useRouter()
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -49,9 +54,10 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
     }
     ;(async () => {
       const { default: liff } = await import("@line/liff")
+      console.log(LIFF_ID)
       await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: false })
       await liff.ready
-      setValue({ liff, user: null })
+      setValue({ liff, user: { user: null, isLoading: true } })
       const idToken = liff.getIDToken()
       if (idToken != null) {
         await postLogin(idToken)
@@ -60,10 +66,13 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
       setValue((prev) => ({
         ...prev,
         user: {
-          id: profile.userId,
-          name: profile.displayName,
-          iconUrl: profile.pictureUrl ?? null,
-          idToken,
+          user: {
+            id: profile.userId,
+            name: profile.displayName,
+            iconUrl: profile.pictureUrl ?? null,
+            idToken,
+          },
+          isLoading: false,
         },
       }))
     })().catch((e) => console.error(e))
@@ -92,10 +101,13 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
       setValue((prev) => ({
         ...prev,
         user: {
-          id: profile.userId,
-          name: profile.displayName,
-          iconUrl: profile.pictureUrl ?? null,
-          idToken,
+          user: {
+            id: profile.userId,
+            name: profile.displayName,
+            iconUrl: profile.pictureUrl ?? null,
+            idToken,
+          },
+          isLoading: false,
         },
       }))
     },
