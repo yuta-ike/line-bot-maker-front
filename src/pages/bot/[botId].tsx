@@ -436,12 +436,12 @@ const BotDetail: React.FC = () => {
           <div className="flex w-[600px] max-w-full flex-col items-center rounded-md bg-white p-4">
             <h2 className="mb-4 text-lg font-bold text-gray-900">
               {tutorialStep === 0
-                ? "ブロックを動かそう"
+                ? "使い方① ブロックを動かそう"
                 : tutorialStep === 1
-                ? "ブロック同士を繋げよう"
+                ? "使い方② ブロック同士を繋げよう"
                 : tutorialStep === 2
-                ? "動作を確認しよう"
-                : "ボットを使おう"}
+                ? "使い方③ 動作を確認しよう"
+                : "使い方④ ボットを使おう"}
             </h2>
             <p className="mb-4 text-gray-600">
               {tutorialStep === 0 ? (
@@ -462,20 +462,23 @@ const BotDetail: React.FC = () => {
                 "完成したら、右下の「保存して公開」から、実際に使ってみよう。QRコードをスマホで読み取ることで、LINEで利用できるようになります"
               )}
             </p>
-            <Image
-              src={
-                tutorialStep === 0
-                  ? "/tutorial/tutorial_1.gif"
-                  : tutorialStep === 1
-                  ? "/tutorial/tutorial_2.gif"
-                  : tutorialStep === 2
-                  ? "/tutorial/tutorial_3.gif"
-                  : "/tutorial/tutorial_4.png"
-              }
-              alt=""
-              width={600}
-              height={400}
-            />
+            <div className="relative flex flex-col items-center justify-center overflow-hidden rounded">
+              <div className="absolute inset-0 bg-gray-200 rounded animate-pulse" />
+              <Image
+                src={
+                  tutorialStep === 0
+                    ? "/tutorial/tutorial_1.gif"
+                    : tutorialStep === 1
+                    ? "/tutorial/tutorial_2.gif"
+                    : tutorialStep === 2
+                    ? "/tutorial/tutorial_3.gif"
+                    : "/tutorial/tutorial_4.png"
+                }
+                alt=""
+                width={600}
+                height={400}
+              />
+            </div>
             <div className="flex justify-between w-full mt-4">
               <button
                 className="rounded border border-gray-300 px-5 py-1.5 hover:bg-gray-100"
