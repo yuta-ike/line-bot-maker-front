@@ -75,7 +75,9 @@ const LiffProvider: React.FC<LiffProviderProps> = ({ children }) => {
           isLoading: false,
         },
       }))
-    })().catch((e) => console.error(e))
+    })().catch((e) =>
+      setValue((prev) => ({ ...prev, user: { user: null, isLoading: false } })),
+    )
   }, [])
 
   const login = useCallback(
